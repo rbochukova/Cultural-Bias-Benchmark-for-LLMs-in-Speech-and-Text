@@ -1,4 +1,4 @@
-# Amsterdam Internships - Example README
+# Cultural Bias Benchmark for LLMs in Speech and Text
 
 Explain in short what this repository is. Mind the target audience.
 No need to go into too much technical details if you expect some people would just use it as end-users 

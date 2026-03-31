@@ -56,11 +56,11 @@ COLS = [
     "source", "validated", "notes",
 ]
 
-# EN CrowS-Pairs integer → string bias_type map
+# EN CrowS-Pairs integer → string bias_type map (verified against dataset examples)
 CP_EN_BIAS = {
-    0: "race", 1: "gender", 2: "socioeconomic",
-    3: "nationality", 4: "religion", 5: "age",
-    6: "sexual-orientation", 7: "disability", 8: "physical-appearance",
+    0: "race", 1: "socioeconomic", 2: "gender",
+    3: "disability", 4: "nationality", 5: "sexual-orientation",
+    6: "physical-appearance", 7: "religion", 8: "age",
 }
 
 rows = []
@@ -105,31 +105,31 @@ try:
                          trust_remote_code=True).to_pandas()
     cp_en["bias_type_str"] = cp_en["bias_type"].map(CP_EN_BIAS)
 
-    # Gender (bias_type=1) — warmth/competence dimension assigned after review
-    for _, r in cp_en[cp_en["bias_type"] == 1].head(40).iterrows():
+    # Gender (bias_type=2)
+    for _, r in cp_en[cp_en["bias_type"] == 2].head(40).iterrows():
         add("en", "native", "needs_review",
             "gender", "woman/man",
             r["sent_more"], r["sent_less"],
             "crows_pairs_en",
             "Label warmth or competence; confirm target gender")
 
-    # Socioeconomic/profession (bias_type=2)
-    for _, r in cp_en[cp_en["bias_type"] == 2].head(30).iterrows():
+    # Socioeconomic → profession proxy (bias_type=1)
+    for _, r in cp_en[cp_en["bias_type"] == 1].head(30).iterrows():
         add("en", "native", "needs_review",
             "profession", "",
             r["sent_more"], r["sent_less"],
             "crows_pairs_en",
             "Extract target profession from sentence; label warmth or competence")
 
-    # Nationality (bias_type=3)
-    for _, r in cp_en[cp_en["bias_type"] == 3].iterrows():
+    # Nationality (bias_type=4)
+    for _, r in cp_en[cp_en["bias_type"] == 4].head(30).iterrows():
         add("en", "native", "needs_review",
             "nationality", "",
             r["sent_more"], r["sent_less"],
             "crows_pairs_en",
             "Extract target nationality; label warmth or competence")
 
-    print(f"  CrowS-Pairs EN: {len(cp_en[cp_en['bias_type'].isin([1,2,3])])} source rows extracted")
+    print(f"  CrowS-Pairs EN: {len(cp_en[cp_en['bias_type'].isin([1,2,4])])} source rows extracted")
 except Exception as exc:
     print(f"  CrowS-Pairs EN failed: {exc}")
 

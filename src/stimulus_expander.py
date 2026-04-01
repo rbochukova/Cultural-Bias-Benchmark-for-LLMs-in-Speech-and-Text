@@ -233,8 +233,20 @@ except Exception as exc:
 
 
 # ── Merge and save ────────────────────────────────────────────────────────────
-new_df  = pd.DataFrame(new_rows, columns=existing.columns.tolist())
-final   = pd.concat([existing, new_df], ignore_index=True)
+# Use explicit column list so notes is never silently dropped even if the
+# existing CSV was saved without it (e.g. after user edits in Excel).
+OUTPUT_COLS = [
+    "item_id", "parallel_group_id", "language", "origin",
+    "dimension", "target_group", "target",
+    "sent_stereotype", "sent_anti_stereotype",
+    "source", "validated", "notes",
+]
+# Ensure existing df has a notes column before concat
+if "notes" not in existing.columns:
+    existing["notes"] = ""
+
+new_df  = pd.DataFrame(new_rows, columns=OUTPUT_COLS)
+final   = pd.concat([existing[OUTPUT_COLS], new_df], ignore_index=True)
 
 final.to_csv(CSV_PATH, index=False, encoding="utf-8-sig")
 

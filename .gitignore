@@ -13,3 +13,6 @@ resources/
 
 # other
 .idea/*
+
+# secrets -- never commit real keys
+.env

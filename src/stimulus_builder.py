@@ -34,12 +34,10 @@ notes              : free-text annotation hints
 import io
 import os
 import pathlib
+import sys
 import urllib.request
-import warnings
 
 import pandas as pd
-
-warnings.filterwarnings("ignore")
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
@@ -242,8 +240,15 @@ for dim, tg, target, s, a in BG_PLACEHOLDERS:
 
 
 # ── Save ─────────────────────────────────────────────────────────────────────
-df = pd.DataFrame(rows, columns=COLS)
 out = DATA / "stimuli_seed.csv"
+if out.exists():
+    sys.exit(
+        f"ERROR: {out} already exists.\n"
+        "stimulus_builder.py seeds a new CSV from scratch and would overwrite\n"
+        "human-validated data. Delete the file manually if you truly want to reseed."
+    )
+
+df = pd.DataFrame(rows, columns=COLS)
 df.to_csv(out, index=False, encoding="utf-8-sig")
 
 print(f"\n{'-'*50}")

@@ -30,3 +30,7 @@ jiwer
 # Utilities
 requests
 tqdm
+
+# API clients
+openai
+python-dotenv

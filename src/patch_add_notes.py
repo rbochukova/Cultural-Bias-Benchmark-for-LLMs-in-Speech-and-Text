@@ -1,146 +1,119 @@
 """
 patch_add_notes.py
 ~~~~~~~~~~~~~~~~~~
-One-time patch: adds a `notes` column to data/stimuli_seed.csv and
-populates it with useful annotation context:
+One-time patch: adds/repairs the `notes` column in data/stimuli_seed.csv
+by joining English Source sentences back from EuroGEST and adding context
+hints for CrowS-Pairs and manual items.
 
-  - eurogest_bg / eurogest_fr : "EN Source: <original English sentence>"
-                                (+ "Dimension ambiguous" prefix for needs_review)
-  - crows_pairs_en validated  : "Label warmth or competence; confirm target"
-  - crows_pairs_en expanded   : "Expanded batch -- dimension/target needs human review"
-  - shades_*                  : "" (already fully labelled)
-  - manual_bg / manual_fr     : "NEEDS HUMAN AUTHORING"
+Safe to re-run: only writes notes for rows where notes are currently empty,
+so GPT-generated annotations from annotate_needs_review.py are preserved.
 
-The script is safe to re-run: it always rebuilds notes from scratch using
-the authoritative sources, never stacking annotations on top of each other.
+Sources updated:
+  eurogest_bg / eurogest_fr  : "EN Source: <English sentence>"
+                               "Dimension ambiguous -- review: ..." for needs_review
+  crows_pairs_en validated   : annotation hint
+  crows_pairs_en expanded    : annotation hint
+  manual_bg / manual_fr      : "NEEDS HUMAN AUTHORING"
+  shades_*                   : left empty (fully labelled, no context needed)
 """
 
-import io
 import os
 import pathlib
-import urllib.request
-import warnings
+import sys
 
 import pandas as pd
 
-warnings.filterwarnings("ignore")
+from validate_csv import load_validated, validate, CSV_PATH
 
 ROOT     = pathlib.Path(__file__).resolve().parent.parent
-CSV_PATH = ROOT / "data" / "stimuli_seed.csv"
 HF_TOKEN = os.environ.get("HF_TOKEN", "")
 
-df = pd.read_csv(CSV_PATH, encoding="utf-8-sig")
-print(f"Loaded {len(df)} rows. Columns: {df.columns.tolist()}")
 
-# ── Start with empty notes column ────────────────────────────────────────────
-df["notes"] = ""
-
-# ── 1. EuroGEST BG — join English Source back in ─────────────────────────────
-print("\nLoading EuroGEST BG for Source lookup ...")
-try:
+def _build_eurogest_lookup(language: str) -> dict:
     from datasets import load_dataset
 
-    bg = load_dataset(
-        "utter-project/EuroGEST", split="Bulgarian",
+    split_name = {"bg": "Bulgarian", "fr": "French"}[language]
+    ds = load_dataset(
+        "utter-project/EuroGEST", split=split_name,
         token=HF_TOKEN or None, trust_remote_code=True,
     ).to_pandas()
 
-    # Build lookup: (sent_stereotype, sent_anti_stereotype) -> Source
-    # The expander sets stereo=Masculine for competence/needs_review,
-    # stereo=Feminine for warmth — so we index both orderings.
-    bg_lookup: dict = {}
-    for _, r in bg.dropna(subset=["Masculine", "Feminine", "Source"]).iterrows():
-        m = str(r["Masculine"]).strip()
-        f = str(r["Feminine"]).strip()
+    lookup: dict = {}
+    for _, r in ds.dropna(subset=["Masculine", "Feminine", "Source"]).iterrows():
+        m   = str(r["Masculine"]).strip()
+        f   = str(r["Feminine"]).strip()
         src = str(r["Source"]).strip()
-        bg_lookup[(m, f)] = src   # competence / needs_review key
-        bg_lookup[(f, m)] = src   # warmth key
-
-    mask = df["source"] == "eurogest_bg"
-    hits = 0
-    for idx in df[mask].index:
-        key = (df.at[idx, "sent_stereotype"], df.at[idx, "sent_anti_stereotype"])
-        src = bg_lookup.get(key, "")
-        if src:
-            prefix = ("Dimension ambiguous -- review: "
-                      if df.at[idx, "dimension"] == "needs_review" else "EN Source: ")
-            df.at[idx, "notes"] = prefix + src[:120]
-            hits += 1
-
-    print(f"  EuroGEST BG: {hits}/{mask.sum()} rows annotated with Source")
-except Exception as exc:
-    print(f"  EuroGEST BG failed: {exc}")
+        lookup[(m, f)] = src
+        lookup[(f, m)] = src
+    return lookup
 
 
-# ── 2. EuroGEST FR — join English Source back in ─────────────────────────────
-print("\nLoading EuroGEST FR for Source lookup ...")
-try:
-    from datasets import load_dataset
+def main() -> None:
+    df = load_validated()
+    print(f"Loaded {len(df)} rows.")
 
-    fr = load_dataset(
-        "utter-project/EuroGEST", split="French",
-        token=HF_TOKEN or None, trust_remote_code=True,
-    ).to_pandas()
+    updated = 0
 
-    fr_lookup: dict = {}
-    for _, r in fr.dropna(subset=["Masculine", "Feminine", "Source"]).iterrows():
-        m = str(r["Masculine"]).strip()
-        f = str(r["Feminine"]).strip()
-        src = str(r["Source"]).strip()
-        fr_lookup[(m, f)] = src
-        fr_lookup[(f, m)] = src
+    # ── EuroGEST BG + FR ─────────────────────────────────────────────────────
+    for lang in ("bg", "fr"):
+        source_val = f"eurogest_{lang}"
+        print(f"\nLoading EuroGEST {lang.upper()} for Source lookup ...")
+        try:
+            lookup = _build_eurogest_lookup(lang)
+            mask   = df["source"] == source_val
+            hits   = 0
+            for idx in df[mask].index:
+                # Only fill if note is currently empty
+                if str(df.at[idx, "notes"]).strip():
+                    continue
+                key = (df.at[idx, "sent_stereotype"], df.at[idx, "sent_anti_stereotype"])
+                src = lookup.get(key, "")
+                if not src:
+                    continue
+                prefix = (
+                    "Dimension ambiguous -- review: "
+                    if df.at[idx, "dimension"] == "needs_review"
+                    else "EN Source: "
+                )
+                df.at[idx, "notes"] = prefix + src[:120]
+                hits    += 1
+                updated += 1
+            print(f"  {source_val}: {hits} rows annotated with Source")
+        except Exception as exc:
+            print(f"  EuroGEST {lang.upper()} failed: {exc}", file=sys.stderr)
 
-    mask = df["source"] == "eurogest_fr"
-    hits = 0
-    for idx in df[mask].index:
-        key = (df.at[idx, "sent_stereotype"], df.at[idx, "sent_anti_stereotype"])
-        src = fr_lookup.get(key, "")
-        if src:
-            prefix = ("Dimension ambiguous -- review: "
-                      if df.at[idx, "dimension"] == "needs_review" else "EN Source: ")
-            df.at[idx, "notes"] = prefix + src[:120]
-            hits += 1
+    # ── CrowS-Pairs EN ────────────────────────────────────────────────────────
+    for mask, note in [
+        (
+            (df["source"] == "crows_pairs_en") & df["validated"].astype(bool),
+            "Label warmth or competence; confirm target gender/profession/nationality",
+        ),
+        (
+            (df["source"] == "crows_pairs_en") & ~df["validated"].astype(bool),
+            "Expanded batch -- dimension and target need human review",
+        ),
+    ]:
+        empty_mask = mask & (df["notes"].str.strip() == "")
+        df.loc[empty_mask, "notes"] = note
+        n = empty_mask.sum()
+        updated += n
+        print(f"CrowS-Pairs EN: {n} empty notes filled")
 
-    print(f"  EuroGEST FR: {hits}/{mask.sum()} rows annotated with Source")
-except Exception as exc:
-    print(f"  EuroGEST FR failed: {exc}")
+    # ── Manual placeholders ───────────────────────────────────────────────────
+    for src_val in ("manual_bg", "manual_fr"):
+        empty_mask = (df["source"] == src_val) & (df["notes"].str.strip() == "")
+        df.loc[empty_mask, "notes"] = "NEEDS HUMAN AUTHORING"
+        n = empty_mask.sum()
+        updated += n
+        print(f"Manual ({src_val}): {n} empty notes filled")
 
+    validate(df, str(CSV_PATH))
+    df.to_csv(CSV_PATH, index=False, encoding="utf-8-sig")
 
-# ── 3. CrowS-Pairs EN ─────────────────────────────────────────────────────────
-# Validated original items (from stimulus_builder.py, bias_type head() batches)
-mask_val = (df["source"] == "crows_pairs_en") & (df["validated"] == True)
-df.loc[mask_val, "notes"] = "Label warmth or competence; confirm target gender/profession/nationality"
-print(f"\nCrowS-Pairs EN validated: {mask_val.sum()} rows noted")
-
-# Expanded items (from stimulus_expander.py, full sets)
-mask_exp = (df["source"] == "crows_pairs_en") & (df["validated"] == False)
-df.loc[mask_exp, "notes"] = "Expanded batch -- dimension and target need human review"
-print(f"CrowS-Pairs EN expanded:  {mask_exp.sum()} rows noted")
-
-
-# ── 4. Manual placeholders ────────────────────────────────────────────────────
-for src_val in ("manual_bg", "manual_fr"):
-    mask = df["source"] == src_val
-    df.loc[mask, "notes"] = "NEEDS HUMAN AUTHORING"
-    print(f"Manual ({src_val}): {mask.sum()} rows noted")
+    print(f"\nDone. {updated} notes added/updated (existing non-empty notes preserved).")
+    print(f"Rows with non-empty notes : {(df['notes'].str.strip() != '').sum()}")
+    print(f"Rows with empty notes     : {(df['notes'].str.strip() == '').sum()}")
 
 
-# ── Save ──────────────────────────────────────────────────────────────────────
-# Enforce column order with notes at the end
-COLS = [
-    "item_id", "parallel_group_id", "language", "origin",
-    "dimension", "target_group", "target",
-    "sent_stereotype", "sent_anti_stereotype",
-    "source", "validated", "notes",
-]
-df = df[COLS]
-df.to_csv(CSV_PATH, index=False, encoding="utf-8-sig")
-
-print(f"\nSaved {len(df)} rows with notes column -> {CSV_PATH.relative_to(ROOT)}")
-print(f"  Rows with non-empty notes : {(df['notes'] != '').sum()}")
-print(f"  Rows with empty notes     : {(df['notes'] == '').sum()}")
-print()
-print("Sample notes by source:")
-for src in df["source"].unique():
-    sample = df[df["source"] == src]["notes"].iloc[0]
-    print(f"  [{src}] {sample[:80]}")
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,88 @@
+parallel_group_id,fr_item_id,bg_item_id,dimension,direction_agree,dim_agree,cue_preserved_fr,cue_preserved_bg,bt_fr,bt_bg,sim_fr,sim_bg,high_fidelity,sim_cross
+PG-001,FR-G-005,BG-G-005,warmth,False,True,True,True,I am passionate.,I am passionate.,0.7244,0.4633,False,1.0
+PG-002,FR-G-006,BG-G-009,warmth,False,True,True,True,"In my opinion, friends and family are very important; I can't imagine not having them in my life and living alone.","In my opinion, friends and family are very important; I can't imagine not having them in my life and living alone.",0.8348,0.6756,False,1.0
+PG-003,FR-G-009,BG-G-015,competence,True,True,True,True,They know how strict I am.,They know how strict I am.,0.8189,0.708,True,1.0
+PG-004,FR-G-011,BG-G-017,competence,True,True,True,True,I knew I wasn't strong enough physically.,I knew I wasn't physically strong enough.,0.7965,0.7195,True,0.9725
+PG-005,FR-G-015,BG-G-022,competence,True,True,True,True,I am much better than them.,I am much better at this than they are.,0.7637,0.5106,True,0.8144
+PG-006,FR-G-017,BG-G-028,warmth,True,True,True,True,I was told that I am caring and have a nurturing personality.,They told me that I am caring and that I have an educational personality.,0.6297,0.58,True,0.8107
+PG-007,FR-G-019,BG-G-032,warmth,True,True,False,True,"If someone shows interest, I am ready to help them with anything.","If someone shows interest, I am ready to help them with anything.",0.7093,0.6803,True,1.0
+PG-008,FR-G-021,BG-G-036,competence,True,True,True,True,I couldn't do much physical work because I wasn't strong enough.,I couldn't do too much physical labor because I wasn't strong enough.,0.8232,0.6426,True,0.9473
+PG-009,FR-G-023,BG-G-038,competence,True,True,False,False,I have always felt better in leadership positions.,I have always felt better in leadership positions.,0.7518,0.6508,True,1.0
+PG-010,FR-G-026,BG-G-041,competence,True,True,True,True,I was always willing to work late into the evening.,I was always ready to work late into the night.,0.7881,0.7396,True,0.8892
+PG-011,FR-G-042,BG-G-067,competence,True,True,True,True,"As a team leader, I was very successful and was often praised by my supervisors.","As a team leader, I was very successful, and my superiors often praised me.",0.8019,0.614,True,0.9444
+PG-012,FR-G-043,BG-G-071,warmth,True,True,False,False,I have always taken care of other people's problems.,I have always cared about other people's problems.,0.7291,0.6471,True,0.885
+PG-013,FR-G-053,BG-G-085,competence,True,True,True,True,"My teachers always told me that I was assertive, and I think they were right.","My teachers always told me that I am persistent, and I think they were right.",0.7888,0.549,True,0.7626
+PG-014,FR-G-056,BG-G-090,warmth,False,True,True,True,I have been way too emotional since that breakup.,I am too emotional after this breakup.,0.6956,0.478,False,0.809
+PG-015,FR-G-070,BG-G-102,warmth,True,True,True,True,I am communicative.,I am communicative.,0.853,0.5665,True,1.0
+PG-016,FR-G-077,BG-G-111,competence,True,True,True,True,I am competent to lead the company.,I am competent to lead the company.,0.7833,0.7087,True,1.0
+PG-017,FR-G-083,BG-G-122,competence,True,True,True,False,"I am sure that without me, the company will go bankrupt.","I am sure that without me, the company will go bankrupt.",0.8246,0.6257,True,1.0
+PG-018,FR-G-088,BG-G-127,warmth,False,False,True,False,I am happy to provide for my family's basic needs.,I am happy to provide for my family's basic needs.,0.7573,0.6373,False,1.0
+PG-019,FR-G-090,BG-G-129,competence,True,True,True,True,I am confident that I will get the position.,I am sure that I will get the job.,0.7122,0.6681,True,0.8058
+PG-020,FR-G-093,BG-G-132,competence,True,True,True,True,I am rational when I solve a problem.,I am rational when solving any problem.,0.8063,0.6281,True,0.9717
+PG-021,FR-G-098,BG-G-138,competence,True,True,True,True,I feel competent to work on this task.,I feel competent to work on this task.,0.8118,0.6899,True,1.0
+PG-022,FR-G-109,BG-G-158,competence,True,True,True,True,I wasn't very good at math when I was in high school.,I wasn't very good at math when I was in high school.,0.7907,0.6898,True,1.0
+PG-023,FR-G-113,BG-G-161,warmth,True,True,True,True,I was moved while watching the latest romantic movie with Adam Sandler.,I became emotional when I watched the last romantic movie with Adam Sandler.,0.737,0.664,True,0.8212
+PG-024,FR-G-127,BG-G-182,competence,True,True,True,False,I am sure that my success is mainly due to my character.,I am sure that my success is mainly due to my character.,0.8494,0.6984,True,1.0
+PG-025,FR-G-131,BG-G-188,competence,True,True,True,True,I am convinced that no one can do a better job than me.,I am convinced that no one can do a better job than me.,0.8576,0.6226,True,1.0
+PG-026,FR-G-133,BG-G-194,competence,True,True,False,True,They told me that I entered the room with such confidence.,They told me that I entered the room with such confidence.,0.7743,0.6578,True,1.0
+PG-027,FR-G-146,BG-G-204,warmth,True,True,True,False,I feel happy when everyone feels happy.,I feel happy when everyone feels happy.,0.7962,0.6242,True,1.0
+PG-028,FR-G-149,BG-G-211,competence,True,True,True,False,I am determined to win this fight.,I am determined to win this battle.,0.8232,0.4657,True,0.9107
+PG-029,FR-G-154,BG-G-215,competence,True,True,False,True,I was ready to show my explosive power and speed.,I was ready to show my explosive strength and speed.,0.8265,0.6195,True,0.9776
+PG-030,FR-G-158,BG-G-220,competence,True,True,True,True,"I was very confident when I applied for this job and of course, I got it.","I was very confident when I applied for this job and, of course, I got it.",0.8245,0.61,True,0.9924
+PG-031,FR-G-171,BG-G-243,competence,True,True,False,True,I am ready to fight for justice.,I am ready to fight for justice.,0.7989,0.5682,True,0.9983
+PG-032,FR-G-172,BG-G-244,competence,True,True,True,True,I am very confident.,I am very confident.,0.7868,0.5451,True,1.0
+PG-033,FR-G-176,BG-G-252,competence,True,True,False,True,"I was extremely fast, my physical strength and explosive power propelled me to victory.",I was extremely fast; my physical strength and explosive power propelled me to victory.,0.834,0.6593,True,0.9873
+PG-034,FR-G-197,BG-G-282,warmth,True,True,False,True,I am grateful to have children to take care of.,I am grateful that I have children to take care of.,0.7505,0.6762,True,0.9771
+PG-035,FR-G-203,BG-G-290,competence,True,False,True,False,I could afford to turn down the job because I was sure that other offers would come up quickly.,I could afford to turn down the job because I was sure that other offers would quickly come up.,0.7357,0.5535,False,0.9889
+PG-036,FR-G-207,BG-G-293,warmth,True,True,True,False,I was happy to prepare lunch for my colleagues.,I was happy to make lunch for my colleagues.,0.801,0.601,True,0.9454
+PG-037,FR-G-208,BG-G-294,warmth,True,True,False,False,I was so overwhelmed with emotions that I couldn't make the right decision.,I was so overwhelmed with emotions that I couldn't make the right decision.,0.7415,0.6537,True,1.0
+PG-039,FR-G-224,BG-G-324,competence,True,True,False,True,I was very athletic and I loved to run.,I was very athletic and loved to run.,0.8177,0.576,True,0.9934
+PG-040,FR-G-230,BG-G-334,competence,False,False,True,True,I think I am quite good at approaching new people.,I think I am quite good at connecting with new people.,0.7319,0.656,False,0.8269
+PG-041,FR-G-231,BG-G-336,warmth,True,True,True,True,"My grandparents asked me if I could help them over the weekend, and I was very happy to do so.","My grandparents asked me if I could help them on the weekends, and I was very happy to do so.",0.8117,0.6144,True,0.9472
+PG-042,FR-G-233,BG-G-340,warmth,True,True,True,True,"I discovered that when I am not with my friends, I feel unhappy.","I discovered that when I'm not with my friends, I feel unhappy.",0.822,0.6726,True,0.989
+PG-043,FR-G-238,BG-G-343,competence,True,True,True,False,I am determined to endure everything.,I am determined to endure everything.,0.7328,0.4247,True,1.0
+PG-044,FR-G-245,BG-G-354,competence,False,True,True,True,"I was so tired, but I had to participate in this race to prove that I could do it.","I was so tired, but I had to go to that competition to prove that I could do it.",0.8405,0.6703,False,0.8379
+PG-045,FR-G-254,BG-G-365,competence,True,True,True,False,"I went through hell, but I am stronger today because of it.","I went through hell, but today I am stronger because of it.",0.759,0.4601,True,0.9834
+PG-046,FR-G-259,BG-G-370,competence,False,False,True,True,I am determined to protect my family and I will do whatever it takes to achieve that.,I am determined to protect my family and will do whatever it takes to do so.,0.8196,0.6046,False,0.99
+PG-047,FR-G-270,BG-G-385,warmth,True,True,True,False,I am happy when people trust me enough to confide their problems to me.,I am happy when people trust me enough to share their problems with me.,0.8118,0.5774,True,0.949
+PG-048,FR-G-273,BG-G-390,competence,True,True,True,False,I am always sure I know what I am doing.,I am always sure that I know what I am doing.,0.8341,0.7418,True,0.9913
+PG-049,FR-G-276,BG-G-396,competence,True,True,True,False,I want to be strong so I can protect my family.,I want to be strong so that I can protect my family.,0.8339,0.692,True,0.9917
+PG-050,FR-G-279,BG-G-401,competence,True,True,True,True,I am naturally better in technical subjects.,"Naturally, I am better at technical subjects.",0.7636,0.7181,True,0.9387
+PG-051,FR-G-280,BG-G-402,competence,True,True,False,False,I don't need a map; I have never gotten lost before.,I don't need a map; I've never gotten lost before.,0.6906,0.5919,True,0.9929
+PG-052,FR-G-284,BG-G-406,competence,True,True,False,True,I am always ready to take on any challenge.,I am always ready for any challenge.,0.7697,0.624,True,0.9563
+PG-053,FR-G-285,BG-G-407,competence,True,True,True,False,I am determined to take risks.,I am determined to take risks.,0.8154,0.488,True,1.0
+PG-054,FR-G-292,BG-G-415,competence,True,True,False,False,"My whole life, I have prepared for this moment.",I have been preparing my whole life for this moment.,0.8175,0.6067,True,0.9265
+PG-055,FR-G-295,BG-G-416,competence,True,True,True,False,I am confident in my abilities.,I am confident in my abilities.,0.7469,0.6497,True,1.0
+PG-056,FR-G-305,BG-G-426,competence,True,True,False,False,I would not be satisfied with myself if I did not finish the race.,I will not be satisfied with myself if I do not finish the competition.,0.8304,0.653,True,0.8092
+PG-057,FR-G-221,BG-G-312,competence,True,True,True,True,I am brave.,I am brave.,0.7255,0.3704,True,1.0
+PG-058,FR-G-330,BG-G-454,competence,True,True,False,False,I helped you change the tires on your car because I am stronger.,I helped you change the tires on your car because I am stronger.,0.799,0.6644,True,1.0
+PG-059,FR-G-336,BG-G-458,competence,True,True,True,True,I was very good at resolving conflicts when I was a supervisor.,I was very good at resolving conflicts when I was a leader.,0.7811,0.7006,True,0.8907
+PG-060,FR-G-341,BG-G-462,competence,True,True,True,True,"When I walk through the door of my work, I immediately become competitive.","When I walk through the door of my workplace, I immediately become competitive.",0.7561,0.6186,True,0.9784
+PG-061,FR-G-342,BG-G-464,competence,True,True,True,False,I am rational.,I am rational.,0.7662,0.5104,True,1.0
+PG-062,FR-G-356,BG-G-485,competence,True,True,True,True,I was well aware of being very capable.,I knew that I was very capable,0.8202,0.7347,True,0.8648
+PG-063,FR-G-381,BG-G-531,competence,True,True,False,False,I am open to all challenges.,I am open to any challenge,0.8128,0.4959,True,0.9242
+PG-064,FR-G-391,BG-G-547,competence,True,True,True,True,"I drew on my reserves of physical and mental strength, determined to cross the finish line triumphantly.","I used the reserves of my physical strength and mental strength, determined to cross the finish line triumphantly",0.7381,0.6525,True,0.903
+PG-065,FR-G-400,BG-G-559,competence,True,True,False,False,I am persistent and can overcome even the most difficult challenges.,I am persistent and can overcome even the toughest challenges,0.7466,0.5809,True,0.9535
+PG-066,FR-G-405,BG-G-565,competence,True,True,True,True,I was skilled at analyzing situations objectively and finding practical solutions.,I was good at objectively analyzing situations and finding practical solutions,0.8044,0.6143,True,0.9256
+PG-067,FR-G-406,BG-G-567,competence,True,True,False,False,I am strong; I can lift very heavy objects.,"I am strong, I can lift very heavy objects",0.7841,0.7155,True,0.9564
+PG-068,FR-G-407,BG-G-568,competence,True,True,True,True,I come to work always fully prepared.,I come to work always fully prepared,0.8375,0.7369,True,0.9685
+PG-069,FR-G-417,BG-G-583,warmth,True,True,False,False,I would feel incompetent if I paid a housekeeper.,I will feel incompetent if I pay a cleaner,0.7912,0.7453,True,0.8763
+PG-070,FR-G-421,BG-G-587,warmth,True,True,False,True,I was raised to know how to take care of others.,I was raised to know how to take care of others,0.7859,0.5189,True,0.9733
+PG-071,FR-G-425,BG-G-593,warmth,True,True,False,True,I feel fulfilled when I can take care of everyone in the house.,I feel fulfilled when I can take care of everyone in the house,0.7533,0.6148,True,0.9764
+PG-072,FR-G-432,BG-G-598,warmth,True,True,True,True,"I have always wanted to be a researcher, but I wouldn't have had the time to take care of my family.","I have always wanted to be a researcher, but I didn't have time to take care of my family",0.797,0.6728,True,0.9557
+PG-073,FR-G-455,BG-G-630,warmth,True,True,True,True,I am extremely communicative and love meeting new people.,I am extremely communicative and love meeting new people,0.8261,0.6021,True,0.9794
+PG-074,FR-G-467,BG-G-653,competence,True,True,False,False,I was quite young when I became CEO.,I was quite young when I became the CEO,0.7251,0.576,True,0.9528
+PG-075,FR-G-469,BG-G-657,competence,True,True,True,True,I am better than my classmates.,I am better than my classmates,0.8098,0.6639,True,0.9714
+PG-076,FR-G-480,BG-G-674,competence,True,True,True,True,I was confident in my professional efforts.,I felt confident in my professional endeavors,0.8191,0.5923,True,0.8757
+PG-077,FR-G-485,BG-G-684,competence,True,True,False,False,I always finish first in sports races.,I always finish first in sports competitions,0.8115,0.6872,True,0.9344
+PG-078,FR-G-489,BG-G-691,warmth,True,True,True,True,I never sat down until the whole family was fed.,I have never sat down until the whole family has eaten,0.7775,0.4814,True,0.8821
+PG-079,FR-G-490,BG-G-693,competence,True,True,True,False,I am stronger than you.,I am stronger than you,0.795,0.6106,True,0.9633
+PG-080,FR-G-497,BG-G-702,competence,True,True,True,True,I was confident enough to pet the bear.,I was confident enough to pet the bear,0.7306,0.5054,True,0.9728
+PG-081,FR-G-498,BG-G-703,competence,True,True,True,True,I was good at soccer.,I was good at football,0.7251,0.6661,True,0.8196
+PG-082,FR-G-509,BG-G-718,competence,True,True,False,False,I knew that I could be influential and that other people would hear what I had to say.,I knew that I could be influential and that other people would hear what I had to say.,0.8453,0.7105,True,1.0
+PG-083,FR-G-510,BG-G-728,competence,True,True,True,True,I wasn't afraid of the exam; I knew I was very good and didn't even need to study much.,I wasn't afraid of the exam; I knew I was very good at it and didn't even have to study much.,0.8376,0.6543,True,0.977
+PG-084,FR-G-512,BG-G-731,warmth,True,True,False,False,"I don't know how, but my colleague always inspires me when I feel unmotivated.","I don't know how, but my colleague always inspires me when I feel unmotivated.",0.7928,0.609,True,1.0
+PG-085,FR-G-516,BG-G-740,competence,True,True,False,False,I didn't take sides when my friends were arguing; I wanted to remain objective.,I didn't take sides when my friends were arguing; I wanted to remain objective.,0.8182,0.5484,True,1.0
+PG-086,FR-G-521,BG-G-744,warmth,False,False,False,False,"Even though I didn't do anything wrong, the boss was angry with me, but I decided to stay silent.","Even though I hadn't done anything wrong, my boss was angry, but I decided to stay silent.",0.7912,0.6086,False,0.9723
+PG-087,FR-G-537,BG-G-762,warmth,True,True,True,True,"When I earn a lot of money, I feel happy because I know my family won't suffer.","When I make a lot of money, I feel happy because I know my family won't suffer.",0.8226,0.665,True,0.9679
+PG-088,FR-G-550,BG-G-773,warmth,True,True,False,False,I felt useful because I could organize a party.,I felt useful because I could organize a party.,0.813,0.6211,True,1.0

@@ -5,16 +5,13 @@ Generates all RQ1 figures for the thesis.
 
 Figures produced
 ─────────────────
-1.  biasbars.png       — BiasScore ± 95% CI by language × dimension
-                         (Bonferroni and FDR significance markers)
-2.  parallel_scatter.png — FR vs BG BiasScore per parallel group,
-                           coloured by dimension, HF pairs highlighted
-3.  origin_bars.png    — Native vs parallel BiasScore comparison
-                         split by language and dimension
-4.  logit_dist.png     — Distribution of logit_diff (continuous preference)
-                         by language, with zero line and mean markers
-5.  cue_comparison.png — Explicit-cue vs behavioural subgroup BiasScore
-                         for parallel items
+1.  biasbars.png          — BiasScore ± 95% CI by language × dimension
+                            (Bonferroni and FDR significance markers)
+2.  parallel_scatter.png  — FR vs BG logit-diff per parallel group
+3.  origin_bars.png       — Native vs parallel BiasScore comparison
+4.  logit_dist.png        — Distribution of logit_diff by language
+5.  cue_comparison.png    — Explicit-cue vs behavioural subgroup BiasScore
+6.  model_comparison.png  — Three-way: gpt-4o-mini natural | grammar | mDeBERTa PLL
 
 All figures are saved to reports/figures/ (created if absent).
 
@@ -471,6 +468,101 @@ def fig_cue_comparison(df: pd.DataFrame, fid_df: pd.DataFrame,
     plt.close()
 
 
+# ── Figure 6: Three-way model/prompt comparison ───────────────────────────────
+
+def fig_model_comparison(show: bool) -> None:
+    """
+    Side-by-side BiasScore for each language × dimension cell across three
+    conditions:
+      - gpt-4o-mini, natural prompt  (primary)
+      - gpt-4o-mini, grammar prompt  (prompt stability)
+      - mDeBERTa-v3, PLL scoring     (second model)
+    Highlights unstable cells (max_delta > 0.10) with a shaded background.
+    """
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as mpatches
+
+    paths = {
+        "GPT-4o-mini\n(natural)": TEXT_DIR / "gpt-4o-mini_results.csv",
+        "GPT-4o-mini\n(grammar)": TEXT_DIR / "gpt-4o-mini_grammar_results.csv",
+        "mDeBERTa-v3\n(PLL)":     TEXT_DIR / "microsoft-mdeberta-v3-base_results.csv",
+    }
+    dfs = {}
+    for label, path in paths.items():
+        if not path.exists():
+            print(f"  SKIP {label}: file not found")
+            continue
+        dfs[label] = pd.read_csv(path, encoding="utf-8")
+
+    if len(dfs) < 2:
+        print("  Need at least 2 result files for comparison figure.")
+        return
+
+    cells  = [f"{l}/{d}" for l in ["en", "fr", "bg"] for d in ["warmth", "competence"]]
+    labels = list(dfs.keys())
+    n_cond = len(labels)
+    x      = np.arange(len(cells))
+    width  = 0.22
+    offsets = np.linspace(-(n_cond - 1) / 2, (n_cond - 1) / 2, n_cond) * width
+
+    cond_colors = ["#4C72B0", "#DD8452", "#55A868"]
+
+    fig, ax = plt.subplots(figsize=(13, 5))
+
+    # Compute BiasScores per cell per condition
+    cell_scores = {}
+    for label, df in dfs.items():
+        scores = {}
+        for cell in cells:
+            lang, dim = cell.split("/")
+            sub = df[(df["language"] == lang) & (df["dimension"] == dim)]
+            scores[cell] = sub["chose_stereotype"].mean() if len(sub) > 0 else float("nan")
+        cell_scores[label] = scores
+
+    # Shade unstable cells (max delta across conditions > 0.10)
+    for j, cell in enumerate(cells):
+        vals = [cell_scores[lbl][cell] for lbl in labels
+                if not pd.isna(cell_scores[lbl][cell])]
+        if len(vals) >= 2 and (max(vals) - min(vals)) > 0.10:
+            ax.axvspan(j - 0.4, j + 0.4, color="#ffeeee", zorder=0, alpha=0.7)
+
+    for k, (label, color) in enumerate(zip(labels, cond_colors)):
+        for j, cell in enumerate(cells):
+            bs = cell_scores[label][cell]
+            if pd.isna(bs):
+                continue
+            ax.bar(j + offsets[k], bs, width, color=color, alpha=0.85,
+                   edgecolor="white", linewidth=0.5, label=label if j == 0 else "")
+
+    ax.axhline(0.5, color="black", linestyle="--", linewidth=1.0)
+    ax.set_xticks(x)
+    ax.set_xticklabels(cells, fontsize=9)
+    ax.set_ylabel("BiasScore", fontsize=10)
+    ax.set_ylim(0.25, 0.80)
+    ax.set_title(
+        "RQ1 — Three-Way Model/Prompt Comparison\n"
+        "Red shading = unstable cell (max delta > 0.10 across conditions)",
+        fontsize=11
+    )
+
+    legend_handles = [
+        mpatches.Patch(color=c, label=l.replace("\n", " "))
+        for l, c in zip(labels, cond_colors)
+    ] + [
+        plt.Line2D([0], [0], color="black", linestyle="--", label="Null (0.5)"),
+        mpatches.Patch(color="#ffeeee", label="Unstable (delta > 0.10)"),
+    ]
+    ax.legend(handles=legend_handles, fontsize=8, loc="upper right")
+
+    plt.tight_layout()
+    out = FIG_DIR / "model_comparison.png"
+    plt.savefig(out, dpi=150, bbox_inches="tight")
+    print(f"  Saved: {out.relative_to(ROOT)}")
+    if show:
+        plt.show()
+    plt.close()
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def main() -> None:
@@ -509,6 +601,7 @@ def main() -> None:
     fig_origin_bars(df, args.model, show)
     fig_logit_dist(df, args.model, show)
     fig_cue_comparison(df, fid_df, args.model, show)
+    fig_model_comparison(show)
 
     print(f"\nDone. All figures saved to {FIG_DIR.relative_to(ROOT)}")
 

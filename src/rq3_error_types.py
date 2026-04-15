@@ -384,6 +384,79 @@ def print_feature_prevalence(df_err: pd.DataFrame) -> None:
         print(f"  {feat:<22}  {n:>5}  {pct:>5.1f}%  {fr_str}")
 
 
+# ── Side-by-side forest plot ─────────────────────────────────────────────────
+
+def fig_logreg_comparison(
+    m_all, m_err, save_path: pathlib.Path
+) -> None:
+    """
+    Two-panel forest plot: left = all items, right = wer_max > 0 only.
+    Predictors shown: wer_mean, wer_asym, negation_flip, pronoun_altered,
+                      deletion_heavy, trait_altered.
+    insertion_heavy excluded (near-complete separation in both models).
+    """
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as mpatches
+
+    SHOW = ["wer_mean", "wer_asym", "negation_flip",
+            "pronoun_altered", "deletion_heavy", "trait_altered"]
+
+    def _extract(model):
+        params = model.params
+        conf   = model.conf_int()
+        pvals  = model.pvalues
+        keep   = [n for n in SHOW if n in params.index]
+        ors  = np.exp(params[keep])
+        lo   = np.exp(conf.loc[keep, 0])
+        hi   = np.exp(conf.loc[keep, 1])
+        pv   = pvals[keep]
+        # mask non-finite
+        finite = np.isfinite(ors.values) & np.isfinite(lo.values) & np.isfinite(hi.values)
+        return (
+            [k for k, f in zip(keep, finite) if f],
+            ors[finite].values,
+            lo[finite].values,
+            hi[finite].values,
+            pv[finite].values,
+        )
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.5), sharey=True)
+    titles = ["All items (N=6,891)", "ASR errors only (wer_max > 0, N=2,535)"]
+
+    for ax, model, title in zip(axes, [m_all, m_err], titles):
+        keep, ors, lo, hi, pv = _extract(model)
+        if not keep:
+            ax.set_title(title)
+            continue
+        y = np.arange(len(keep))
+        colors = ["#d62728" if p < 0.05 else "#aec7e8" for p in pv]
+        ax.barh(y, ors - 1, left=1, height=0.5, color=colors, alpha=0.85)
+        ax.errorbar(ors, y, xerr=[ors - lo, hi - ors],
+                    fmt="none", color="black", capsize=3, linewidth=1.1)
+        ax.axvline(1.0, color="black", linewidth=0.8, linestyle="--", alpha=0.7)
+        x_max = max(hi) * 1.22
+        for i, (o, h, p) in enumerate(zip(ors, hi, pv)):
+            sig = "***" if p < 0.001 else "**" if p < 0.01 else "*" if p < 0.05 else ""
+            ax.text(h + (x_max - 1) * 0.04, i, f"{o:.2f}{sig}", va="center", fontsize=8)
+        ax.set_yticks(y)
+        ax.set_yticklabels([PREDICTOR_LABELS.get(k, k) for k in keep])
+        ax.set_xlabel("Odds ratio (95 % CI)", fontsize=9)
+        ax.set_title(title, fontsize=9, pad=6)
+        ax.set_xlim(left=max(0, min(lo) * 0.75), right=x_max)
+
+    sig_p = mpatches.Patch(color="#d62728", alpha=0.85, label="p < .05")
+    ns_p  = mpatches.Patch(color="#aec7e8", alpha=0.85, label="n.s.")
+    fig.legend(handles=[sig_p, ns_p], loc="lower right", fontsize=8,
+               bbox_to_anchor=(0.98, 0.02))
+    fig.suptitle("RQ3 — Predictors of speech-vs-text decision flip", fontsize=10, y=1.01)
+    fig.tight_layout()
+    fig.savefig(save_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    print(f"\nFigure saved: {save_path.relative_to(ROOT)}")
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
@@ -485,13 +558,31 @@ def main() -> None:
         f"insertion_heavy + deletion_heavy + trait_altered + {ctrl}"
     )
 
-    m0 = run_logit(reg_df, base_formula,  "Base model   : WER + controls")
-    m1 = run_logit(reg_df, ext_formula,   "Extended model: WER + error types + controls")
+    m0 = run_logit(reg_df, base_formula,  "Base model   : WER + controls  [all items]")
+    m1 = run_logit(reg_df, ext_formula,   "Extended model: WER + error types + controls  [all items]")
 
     likelihood_ratio_test(m0, m1)
 
-    # ── Forest plot ───────────────────────────────────────────────────────────
-    fig_logreg(m1, FIGURES / "rq3_logreg.png")
+    # ── Sensitivity: restrict to items with any ASR error (wer_max > 0) ───────
+    reg_err = df_err.copy()
+    reg_err["language"]  = reg_err["language"].astype(str)
+    reg_err["dimension"] = reg_err["dimension"].astype(str)
+
+    # Base model has no wer_mean variance issue here since all wer_max > 0,
+    # but wer_mean is still continuous so keep it.
+    # Drop insertion_heavy (only 5 cases — would cause separation again).
+    err_formula = (
+        f"flip ~ wer_mean + wer_asym + negation_flip + pronoun_altered + "
+        f"deletion_heavy + trait_altered + {ctrl}"
+    )
+    print(f"\n{'─' * 60}")
+    print(f"  Sensitivity: restricted to wer_max > 0  (N={len(reg_err)})")
+    print(f"{'─' * 60}")
+    m2 = run_logit(reg_err, err_formula,
+                   "Error-type model [wer_max > 0 only, insertion_heavy dropped]")
+
+    # ── Forest plot — side-by-side all-items vs errors-only ───────────────────
+    fig_logreg_comparison(m1, m2, FIGURES / "rq3_logreg.png")
 
     # ── Save feature table ────────────────────────────────────────────────────
     if args.save_features:

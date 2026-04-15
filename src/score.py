@@ -1023,6 +1023,80 @@ def main() -> None:
                 ag_d = (fr_d.loc[com_d] == bg_d.loc[com_d]).mean()
                 print(f"    {dim}: {len(com_d)} pairs, {100*ag_d:.1f}% same")
 
+    # ── 8b. Cross-language agreement: PN- (nationality) & PP- (profession) ──────
+    for prefix, label in [("PN-", "nationality EN-FR-BG"),
+                          ("PP-", "profession EN-FR-BG")]:
+        tri = text_df[text_df["parallel_group_id"].str.startswith(prefix, na=False)].copy()
+        if len(tri) == 0:
+            continue
+        n_groups = tri["parallel_group_id"].nunique()
+        print(f"\n── [6{prefix[1]}] Cross-language agreement ({label}, {n_groups} groups) ──")
+
+        # BiasScore per language in this parallel set
+        bs_tbl = summarise(tri, ["language", "dimension"])
+        bs_tbl = fdr_bh(bs_tbl)
+        print(f"  BiasScore per language × dimension:")
+        print(bs_tbl[["language", "dimension", "N", "BiasScore",
+                       "CI_lo", "CI_hi", "p_value", "sig_fdr_bh"]].to_string(index=False))
+
+        # Pairwise cross-language agreement (all pairs of languages present)
+        langs_present = sorted(tri["language"].unique())
+        lang_choices  = {
+            lang: tri[tri["language"] == lang]
+                  .set_index("parallel_group_id")["chose_stereotype"]
+            for lang in langs_present
+        }
+        print(f"\n  Pairwise agreement (same binary choice on same parallel group):")
+        pairs_seen = set()
+        for la in langs_present:
+            for lb in langs_present:
+                if la >= lb or (la, lb) in pairs_seen:
+                    continue
+                pairs_seen.add((la, lb))
+                common = lang_choices[la].index.intersection(lang_choices[lb].index)
+                if len(common) == 0:
+                    continue
+                agree = (lang_choices[la].loc[common]
+                         == lang_choices[lb].loc[common]).mean()
+                print(f"    {la.upper()}↔{lb.upper()}  N={len(common)}  "
+                      f"agree={100*agree:.1f}%")
+
+        # 3-way agreement (all three languages present)
+        if len(langs_present) == 3:
+            la, lb, lc = langs_present
+            triple = (lang_choices[la].index
+                      .intersection(lang_choices[lb].index)
+                      .intersection(lang_choices[lc].index))
+            if len(triple) > 0:
+                full_agree = (
+                    (lang_choices[la].loc[triple] == lang_choices[lb].loc[triple])
+                    & (lang_choices[lb].loc[triple] == lang_choices[lc].loc[triple])
+                ).mean()
+                print(f"    {la.upper()}↔{lb.upper()}↔{lc.upper()} (3-way)  "
+                      f"N={len(triple)}  agree={100*full_agree:.1f}%")
+
+        # By dimension
+        for dim in ["warmth", "competence"]:
+            sub_dim = tri[tri["dimension"] == dim]
+            if len(sub_dim) == 0:
+                continue
+            dim_choices = {
+                lang: sub_dim[sub_dim["language"] == lang]
+                      .set_index("parallel_group_id")["chose_stereotype"]
+                for lang in langs_present
+            }
+            if len(langs_present) == 3:
+                la, lb, lc = langs_present
+                triple_d = (dim_choices[la].index
+                            .intersection(dim_choices[lb].index)
+                            .intersection(dim_choices[lc].index))
+                if len(triple_d) > 0:
+                    fa = (
+                        (dim_choices[la].loc[triple_d] == dim_choices[lb].loc[triple_d])
+                        & (dim_choices[lb].loc[triple_d] == dim_choices[lc].loc[triple_d])
+                    ).mean()
+                    print(f"    {dim}: 3-way agree={100*fa:.1f}%  (N={len(triple_d)})")
+
     # ── 9. Cue-based subgroup analysis ───────────────────────────────────────
     cue_subgroup_analysis(text_df, fidelity_df)
 

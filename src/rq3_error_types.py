@@ -227,15 +227,29 @@ def extract_features(row: pd.Series) -> dict:
 
 # ── Logistic regression ───────────────────────────────────────────────────────
 
+def _pseudo_r2(model) -> dict:
+    """McFadden and Nagelkerke pseudo-R² for a fitted statsmodels logit model."""
+    llf    = model.llf
+    llnull = model.llnull
+    n      = model.nobs
+    mcfadden   = 1.0 - llf / llnull
+    cox_snell  = 1.0 - np.exp(-(2.0 / n) * (llf - llnull))
+    max_cs     = 1.0 - np.exp(2.0 * llnull / n)
+    nagelkerke = cox_snell / max_cs if max_cs > 0 else float("nan")
+    return {"mcfadden": round(mcfadden, 4), "nagelkerke": round(nagelkerke, 4)}
+
+
 def run_logit(df: pd.DataFrame, formula: str, label: str):
     import statsmodels.formula.api as smf
 
     model = smf.logit(formula, data=df).fit(disp=False, maxiter=300)
     n_events = int(df["flip"].sum())
+    r2 = _pseudo_r2(model)
     print(f"\n{'─' * 60}")
     print(f"  {label}")
     print(f"  N = {len(df)},  events = {n_events}  ({100*n_events/len(df):.1f}%)")
     print(f"  Log-likelihood = {model.llf:.2f},  AIC = {model.aic:.1f}")
+    print(f"  McFadden R² = {r2['mcfadden']:.4f},  Nagelkerke R² = {r2['nagelkerke']:.4f}")
     print(f"{'─' * 60}")
 
     tbl = model.summary2().tables[1].copy()
@@ -391,6 +405,102 @@ def print_feature_prevalence(df_err: pd.DataFrame) -> None:
         fr  = sub["flip"].mean() if len(sub) > 0 else float("nan")
         fr_str = f"{fr:>10.3f}" if not pd.isna(fr) else f"{'—':>10}"
         print(f"  {feat:<22}  {n:>5}  {pct:>5.1f}%  {fr_str}")
+
+
+def print_feature_prevalence_by_lang(df_err: pd.DataFrame) -> None:
+    """Flip rate × error type × language (items with wer_max > 0)."""
+    features = ["negation_flip", "pronoun_altered", "insertion_heavy",
+                "deletion_heavy", "trait_altered"]
+    langs = sorted(df_err["language"].unique())
+    col_w = 14
+
+    header = f"  {'feature':<22}"
+    for lang in langs:
+        header += f"  {(lang.upper() + ' N').rjust(5)}  {'flip%'.rjust(6)}"
+    print(f"\nError-type flip rates by language (wer_max > 0):")
+    print(header)
+    print(f"  {'─'*22}" + ("  ─────  ──────" * len(langs)))
+
+    for feat in features:
+        row = f"  {feat:<22}"
+        for lang in langs:
+            sub_lang = df_err[df_err["language"] == lang]
+            sub_feat = sub_lang[sub_lang[feat] == 1]
+            n  = len(sub_feat)
+            fr = sub_feat["flip"].mean() if n > 0 else float("nan")
+            fr_str = f"{100*fr:>5.1f}%" if not pd.isna(fr) else f"{'—':>6}"
+            row += f"  {n:>5}  {fr_str:>6}"
+        print(row)
+
+
+def per_language_logit(df: pd.DataFrame) -> None:
+    """
+    Fit the error-type logistic regression separately per language.
+    Helps assess whether negation_flip and deletion_heavy effects generalise
+    across EN (analytic), FR (synthetic), and BG (morphologically rich).
+    Uses all items (not restricted to wer_max > 0) to maximise N per language.
+    insertion_heavy excluded in BG/FR where N is very small.
+    """
+    import statsmodels.formula.api as smf
+
+    print(f"\n{'=' * 60}")
+    print("Per-language logistic regression (error-type model, all items)")
+    print(f"{'=' * 60}")
+    print("  Formula: flip ~ wer_mean + wer_asym + negation_flip + pronoun_altered")
+    print("           + deletion_heavy + trait_altered + C(dimension)")
+    print("  Reference level: dimension = warmth")
+
+    formula = (
+        "flip ~ wer_mean + wer_asym + negation_flip + pronoun_altered "
+        "+ deletion_heavy + trait_altered "
+        "+ C(dimension, Treatment('warmth'))"
+    )
+    key_preds = ["wer_mean", "wer_asym", "negation_flip", "pronoun_altered",
+                 "deletion_heavy", "trait_altered"]
+
+    for lang in ["en", "fr", "bg"]:
+        sub = df[df["language"] == lang].copy()
+        sub["dimension"] = sub["dimension"].astype(str)
+        n_total = len(sub)
+        n_flips = int(sub["flip"].sum())
+
+        print(f"\n  ── {lang.upper()}  (N={n_total}, flips={n_flips}, "
+              f"{100*n_flips/n_total:.1f}%) ──")
+
+        if n_flips < 10:
+            print(f"    Skipped: too few events ({n_flips}) for stable estimates.")
+            continue
+
+        try:
+            model = smf.logit(formula, data=sub).fit(disp=False, maxiter=300)
+            r2 = _pseudo_r2(model)
+            print(f"    McFadden R² = {r2['mcfadden']:.4f},  "
+                  f"Nagelkerke R² = {r2['nagelkerke']:.4f},  "
+                  f"AIC = {model.aic:.1f}")
+
+            tbl = model.summary2().tables[1].copy()
+            tbl.columns = ["coef", "std_err", "z", "p", "CI_lo", "CI_hi"]
+            tbl["OR"]    = np.exp(tbl["coef"])
+            tbl["OR_lo"] = np.exp(tbl["CI_lo"])
+            tbl["OR_hi"] = np.exp(tbl["CI_hi"])
+            tbl["sig"]   = tbl["p"].apply(
+                lambda p: "***" if p < 0.001 else "**" if p < 0.01
+                          else "*" if p < 0.05 else ""
+            )
+            # Filter to non-infinite OR and key predictors
+            show = [k for k in key_preds if k in tbl.index]
+            finite_mask = (
+                np.isfinite(tbl.loc[show, "OR"].values)
+                & np.isfinite(tbl.loc[show, "OR_lo"].values)
+            )
+            show = [k for k, f in zip(show, finite_mask) if f]
+            if show:
+                print(tbl.loc[show, ["OR", "OR_lo", "OR_hi", "p", "sig"]]
+                      .to_string(float_format="{:.4f}".format))
+            else:
+                print("    (no finite ORs for key predictors)")
+        except Exception as exc:
+            print(f"    Model failed: {exc}")
 
 
 # ── Side-by-side forest plot ─────────────────────────────────────────────────
@@ -553,6 +663,7 @@ def main() -> None:
     print_flip_by_cell(df)
     print_flip_by_wer_bin(df)
     print_feature_prevalence(df_err)
+    print_feature_prevalence_by_lang(df_err)
 
     # ── Logistic regression ───────────────────────────────────────────────────
     # Reference levels: language = "en", dimension = "warmth"
@@ -589,6 +700,9 @@ def main() -> None:
     print(f"{'─' * 60}")
     m2 = run_logit(reg_err, err_formula,
                    "Error-type model [wer_max > 0 only, insertion_heavy dropped]")
+
+    # ── Per-language stratified analysis ─────────────────────────────────────
+    per_language_logit(df)
 
     # ── Forest plot — side-by-side all-items vs errors-only ───────────────────
     fig_logreg_comparison(m1, m2, FIGURES / "rq3_logreg.png")

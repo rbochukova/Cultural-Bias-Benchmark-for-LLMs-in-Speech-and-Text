@@ -772,6 +772,32 @@ def asr_attribution(text_df: pd.DataFrame, speech_df: pd.DataFrame) -> pd.DataFr
         p = float(1 - chi2_dist.cdf(chi2_stat, df=1))
         return round(chi2_stat, 3), round(p, 4)
 
+    def _boot_asr_contribution(grp: pd.DataFrame, n: int = 5000) -> tuple:
+        """Bootstrap 95% CI on asr_contribution = gap_wer_gt0 − gap_wer0."""
+        wer   = grp["wer_mean"].values
+        text  = grp["chose_stereotype_text"].values.astype(float)
+        speech = grp["chose_stereotype_speech"].values.astype(float)
+        # Need at least a few items in both sub-groups to resample meaningfully
+        if (wer == 0).sum() < 3 or (wer > 0).sum() < 3:
+            return float("nan"), float("nan")
+        contribs = []
+        for _ in range(n):
+            idx      = _rng.integers(0, len(grp), size=len(grp))
+            w_b      = wer[idx]
+            t_b      = text[idx]
+            s_b      = speech[idx]
+            mask0    = w_b == 0
+            mask_gt0 = w_b > 0
+            if mask0.sum() == 0 or mask_gt0.sum() == 0:
+                continue
+            g0  = (s_b[mask0]    - t_b[mask0]).mean()
+            gi  = (s_b[mask_gt0] - t_b[mask_gt0]).mean()
+            contribs.append(gi - g0)
+        if len(contribs) < 100:
+            return float("nan"), float("nan")
+        return (round(float(np.percentile(contribs, 2.5)), 4),
+                round(float(np.percentile(contribs, 97.5)), 4))
+
     # ── Gap helper ────────────────────────────────────────────────────────────
     def _gap(g: pd.DataFrame) -> float:
         if len(g) == 0:
@@ -789,25 +815,29 @@ def asr_attribution(text_df: pd.DataFrame, speech_df: pd.DataFrame) -> pd.DataFr
         mc_chi2, mc_p   = _mcnemar(grp)
         gap_p           = _gap(perfect)
         gap_i           = _gap(imperfect)
+        asr_contrib     = round(
+            (gap_i - gap_p) if not (pd.isna(gap_i) or pd.isna(gap_p)) else float("nan"), 4
+        )
+        contrib_ci_lo, contrib_ci_hi = _boot_asr_contribution(grp)
 
         row = {
-            "language":           lang,
-            "dimension":          dim,
-            "N_total":            len(grp),
-            "N_wer0":             len(perfect),
-            "N_wer_gt0":          len(imperfect),
-            "BiasScore_text":     round(grp["chose_stereotype_text"].mean(), 4),
-            "BiasScore_speech":   round(grp["chose_stereotype_speech"].mean(), 4),
-            "gap_overall":        gap_ov,
-            "gap_ci_lo":          ci_lo,
-            "gap_ci_hi":          ci_hi,
-            "mcnemar_chi2":       mc_chi2,
-            "mcnemar_p":          mc_p,
-            "gap_wer0":           gap_p,
-            "gap_wer_gt0":        gap_i,
-            "asr_contribution":   round(
-                (gap_i - gap_p) if not (pd.isna(gap_i) or pd.isna(gap_p)) else float("nan"), 4
-            ),
+            "language":              lang,
+            "dimension":             dim,
+            "N_total":               len(grp),
+            "N_wer0":                len(perfect),
+            "N_wer_gt0":             len(imperfect),
+            "BiasScore_text":        round(grp["chose_stereotype_text"].mean(), 4),
+            "BiasScore_speech":      round(grp["chose_stereotype_speech"].mean(), 4),
+            "gap_overall":           gap_ov,
+            "gap_ci_lo":             ci_lo,
+            "gap_ci_hi":             ci_hi,
+            "mcnemar_chi2":          mc_chi2,
+            "mcnemar_p":             mc_p,
+            "gap_wer0":              gap_p,
+            "gap_wer_gt0":           gap_i,
+            "asr_contribution":      asr_contrib,
+            "asr_contrib_ci_lo":     contrib_ci_lo,
+            "asr_contrib_ci_hi":     contrib_ci_hi,
         }
 
         if sklearn_ok and len(grp) >= 10:
@@ -1104,8 +1134,30 @@ def main() -> None:
                      "BiasScore_text", "BiasScore_speech",
                      "gap_overall", "gap_ci_lo", "gap_ci_hi",
                      "mcnemar_chi2", "mcnemar_p", "mcnemar_sig_fdr",
-                     "gap_wer0", "gap_wer_gt0", "asr_contribution",
+                     "gap_wer0", "gap_wer_gt0",
+                     "asr_contribution", "asr_contrib_ci_lo", "asr_contrib_ci_hi",
                      "lr_coef_modality", "lr_coef_wer"]].to_string(index=False))
+
+        # ── ASR contribution significance summary ─────────────────────────────
+        print(f"\n── ASR Contribution Decomposition (gap_wer_gt0 − gap_wer0) ──")
+        print(f"  asr_contribution = ΔASR attributable to transcription errors")
+        print(f"  CI excludes 0 → contribution is statistically distinguishable from residual")
+        print(f"  {'lang':<5}  {'dim':<12}  {'contrib':>8}  {'CI_lo':>8}  {'CI_hi':>8}  {'sig':>5}")
+        print(f"  {'─'*5}  {'─'*12}  {'─'*8}  {'─'*8}  {'─'*8}  {'─'*5}")
+        for _, r in attr.iterrows():
+            contrib = r["asr_contribution"]
+            lo      = r["asr_contrib_ci_lo"]
+            hi      = r["asr_contrib_ci_hi"]
+            if pd.isna(contrib):
+                sig = "n/a"
+            elif pd.isna(lo) or pd.isna(hi):
+                sig = "no CI"
+            else:
+                sig = "*" if (lo > 0 or hi < 0) else ""
+            c_str  = f"{contrib:>8.4f}" if not pd.isna(contrib) else f"{'—':>8}"
+            lo_str = f"{lo:>8.4f}"      if not pd.isna(lo)      else f"{'—':>8}"
+            hi_str = f"{hi:>8.4f}"      if not pd.isna(hi)      else f"{'—':>8}"
+            print(f"  {r['language']:<5}  {r['dimension']:<12}  {c_str}  {lo_str}  {hi_str}  {sig:>5}")
 
         print("\n── ASR WER summary ──")
         print(f"  Mean WER_S : {speech_df['wer_S'].mean():.3f}")

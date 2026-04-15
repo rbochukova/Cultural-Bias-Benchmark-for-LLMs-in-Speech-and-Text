@@ -435,31 +435,35 @@ def print_feature_prevalence_by_lang(df_err: pd.DataFrame) -> None:
 
 def per_language_logit(df: pd.DataFrame) -> None:
     """
-    Fit the error-type logistic regression separately per language.
-    Helps assess whether negation_flip and deletion_heavy effects generalise
+    Fit the error-type logistic regression separately per language,
+    restricted to items with wer_max > 0.
+
+    Rationale: EN has 79% perfect transcriptions — including WER=0 items
+    makes error-type features near-constant, causing a singular matrix.
+    Restricting to wer_max > 0 focuses on items where error types are
+    meaningful and avoids collinearity. Predictors with < 5 positive cases
+    or 0 flips among positive cases are dropped per language to prevent
+    quasi-complete separation.
+
+    Helps assess whether negation_flip / deletion_heavy effects generalise
     across EN (analytic), FR (synthetic), and BG (morphologically rich).
-    Uses all items (not restricted to wer_max > 0) to maximise N per language.
-    insertion_heavy excluded in BG/FR where N is very small.
     """
     import statsmodels.formula.api as smf
 
-    print(f"\n{'=' * 60}")
-    print("Per-language logistic regression (error-type model, all items)")
-    print(f"{'=' * 60}")
-    print("  Formula: flip ~ wer_mean + wer_asym + negation_flip + pronoun_altered")
-    print("           + deletion_heavy + trait_altered + C(dimension)")
-    print("  Reference level: dimension = warmth")
+    MIN_EVENTS = 5  # minimum positive cases needed to include a binary predictor
 
-    formula = (
-        "flip ~ wer_mean + wer_asym + negation_flip + pronoun_altered "
-        "+ deletion_heavy + trait_altered "
-        "+ C(dimension, Treatment('warmth'))"
-    )
-    key_preds = ["wer_mean", "wer_asym", "negation_flip", "pronoun_altered",
-                 "deletion_heavy", "trait_altered"]
+    print(f"\n{'=' * 60}")
+    print("Per-language logistic regression (error-type model, wer_max > 0)")
+    print(f"{'=' * 60}")
+    print(f"  Restricted to items with any ASR error (wer_max > 0).")
+    print(f"  Predictors with < {MIN_EVENTS} cases or 0 flips among cases are dropped.")
+    print(f"  Reference level: dimension = warmth")
+
+    err_preds = ["negation_flip", "pronoun_altered", "deletion_heavy", "trait_altered"]
+    wer_preds  = ["wer_mean", "wer_asym"]
 
     for lang in ["en", "fr", "bg"]:
-        sub = df[df["language"] == lang].copy()
+        sub = df[(df["language"] == lang) & (df["wer_max"] > 0)].copy()
         sub["dimension"] = sub["dimension"].astype(str)
         n_total = len(sub)
         n_flips = int(sub["flip"].sum())
@@ -471,9 +475,34 @@ def per_language_logit(df: pd.DataFrame) -> None:
             print(f"    Skipped: too few events ({n_flips}) for stable estimates.")
             continue
 
+        # Auto-select error-type predictors with sufficient data
+        usable = []
+        dropped_preds = []
+        for feat in err_preds:
+            n_pos   = int(sub[feat].sum())
+            n_flip1 = int(sub.loc[sub[feat] == 1, "flip"].sum())
+            if n_pos < MIN_EVENTS or n_flip1 == 0:
+                dropped_preds.append(f"{feat}(N={n_pos},flips={n_flip1})")
+            else:
+                usable.append(feat)
+
+        if dropped_preds:
+            print(f"    Dropped (sparse): {', '.join(dropped_preds)}")
+
+        if not usable and not wer_preds:
+            print(f"    Skipped: no usable predictors after sparsity filter.")
+            continue
+
+        pred_str = " + ".join(wer_preds + usable)
+        formula  = (
+            f"flip ~ {pred_str} "
+            f"+ C(dimension, Treatment('warmth'))"
+        )
+
         try:
             model = smf.logit(formula, data=sub).fit(disp=False, maxiter=300)
-            r2 = _pseudo_r2(model)
+            r2    = _pseudo_r2(model)
+            print(f"    Predictors: {pred_str}")
             print(f"    McFadden R² = {r2['mcfadden']:.4f},  "
                   f"Nagelkerke R² = {r2['nagelkerke']:.4f},  "
                   f"AIC = {model.aic:.1f}")
@@ -487,18 +516,19 @@ def per_language_logit(df: pd.DataFrame) -> None:
                 lambda p: "***" if p < 0.001 else "**" if p < 0.01
                           else "*" if p < 0.05 else ""
             )
-            # Filter to non-infinite OR and key predictors
-            show = [k for k in key_preds if k in tbl.index]
-            finite_mask = (
+            show_preds = wer_preds + usable
+            show = [k for k in show_preds if k in tbl.index]
+            finite = (
                 np.isfinite(tbl.loc[show, "OR"].values)
                 & np.isfinite(tbl.loc[show, "OR_lo"].values)
+                & np.isfinite(tbl.loc[show, "OR_hi"].values)
             )
-            show = [k for k, f in zip(show, finite_mask) if f]
+            show = [k for k, f in zip(show, finite) if f]
             if show:
                 print(tbl.loc[show, ["OR", "OR_lo", "OR_hi", "p", "sig"]]
                       .to_string(float_format="{:.4f}".format))
             else:
-                print("    (no finite ORs for key predictors)")
+                print("    (no finite ORs — all predictors quasi-separated)")
         except Exception as exc:
             print(f"    Model failed: {exc}")
 

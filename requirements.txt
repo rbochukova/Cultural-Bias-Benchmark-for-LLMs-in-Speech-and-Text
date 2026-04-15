@@ -34,3 +34,6 @@ tqdm
 # API clients
 openai
 python-dotenv
+
+# Statistical modelling
+statsmodels

@@ -45,7 +45,10 @@ WHISPER_LANG = {"en": "english", "fr": "french", "bg": "bulgarian"}
 def _load_whisper(model_name: str):
     try:
         import whisper
-        return whisper.load_model(model_name)
+        import torch
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        print(f"Using device: {device}")
+        return whisper.load_model(model_name, device=device)
     except ImportError:
         sys.exit(
             "ERROR: openai-whisper not installed.\n"
@@ -56,10 +59,11 @@ def _load_whisper(model_name: str):
 def _transcribe(model, audio_path: pathlib.Path, lang_code: str) -> str:
     """Return transcript string for one audio file."""
     import whisper
+    import torch
     result = model.transcribe(
         str(audio_path),
         language=WHISPER_LANG.get(lang_code, None),
-        fp16=False,   # fp16 requires CUDA; CPU-safe default
+        fp16=torch.cuda.is_available(),
     )
     return result["text"].strip()
 
@@ -199,9 +203,18 @@ def main() -> None:
 
 
 def _flush(results: list[dict], path: pathlib.Path) -> None:
+    if not results:
+        return
     new_df = pd.DataFrame(results)
     if path.exists():
-        existing = pd.read_csv(path, encoding="utf-8")
+        try:
+            existing = pd.read_csv(path, encoding="utf-8")
+        except pd.errors.EmptyDataError:
+            existing = pd.DataFrame()
+        if existing.empty:
+            combined = new_df
+            combined.to_csv(path, index=False, encoding="utf-8")
+            return
         done_keys = set(zip(existing["item_id"].astype(str), existing["suffix"].astype(str)))
         new_df = new_df[
             ~new_df.apply(lambda r: (str(r["item_id"]), str(r["suffix"])) in done_keys, axis=1)

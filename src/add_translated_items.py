@@ -75,7 +75,9 @@ def _max_num(df: pd.DataFrame, prefix: str) -> int:
     ids = df[df["item_id"].str.startswith(prefix, na=False)]["item_id"]
     if ids.empty:
         return 0
-    nums = ids.str.extract(re.escape(prefix) + r"(\d+)")[0].astype(int)
+    nums = ids.str.extract(re.escape(prefix) + r"(\d+)")[0].dropna().astype(int)
+    if nums.empty:
+        return 0
     return int(nums.max())
 
 

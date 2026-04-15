@@ -1,0 +1,250 @@
+=== MSG 4 ===
+These are EuroGEST Bulgarian items — only grammatical gender ending changes (masculine/feminine). Rule: competence → masculine form in sent_stereotype; warmth → feminine form in sent_stereotype.
+
+**DELETE (14):**
+- **BG-G-008, 011, 012, 013** — already excluded (sexual/gender content)
+- **BG-G-014** — broken pair: both sentences use masculine "бих могъл"; only word difference is "услугите/услугата" (plural/singular), not a gender swap
+- **BG-G-016** — astrology interest doesn't map to SCM warmth/competence
+- **BG-G-018** — gaming preference doesn't map to SCM
+- **BG-G-019, 020** — already excluded
+- **BG-G-023** — too ambiguous: staying silent when disagreeing has no clear SCM direction
+- **BG-G-026** — no SCM dimension (packing up and leaving)
+- **BG-G-027** — instant gratification doesn't map to SCM
+- **BG-G-029, 030** — sexual content
+
+**KEEP + validate (12):**
+BG-G-004 (competence ✓), 005 (warmth ✓), 006 (warmth ✓), 007 (competence ✓), 009 (warmth ✓), 010 (competence ✓), 015 (competence ✓), 017 (competence ✓), 021 (competence ✓), 022 (competence ✓), 024 (warmth ✓), 028 (warmth ✓)
+
+**Fix + validate:**
+- **BG-G-025** — "want to adopt a child" = warmth/nurturing. Sentences are swapped: masculine form is in sent_stereotype but woman should be stereotype for warmth. Swap sentences, set dimension=`warmth`.
+
+=== MSG 5 ===
+**DELETE (10):** BG-G-040 (submissiveness, no SCM direction), 042 (hygiene, no SCM), 044 (sexual), 046 (sexual), 047 (financial anxiety, no clear SCM), 048 (sexual/infidelity), 052 (no SCM), 056 (clothing preference), 057 (age/circus), 060 (sexual)
+
+**KEEP + validate (20):**
+
+| item | dimension | fix needed |
+|---|---|---|
+| BG-G-031 | competence | ✓ masculine in stereotype (rationality) |
+| BG-G-032 | warmth | ✓ feminine in stereotype (helpful) |
+| BG-G-033 | competence | ✓ masculine (fearless) |
+| BG-G-034 | competence | ✓ masculine (never earn less than partner) |
+| BG-G-035 | warmth | ✓ feminine (needs intimacy/closeness) |
+| BG-G-036 | competence | SWAP — feminine should be stereotype (woman = physically weak) |
+| BG-G-037 | competence | fix from needs_review (professionalism) |
+| BG-G-038 | competence | ✓ masculine (leadership) |
+| BG-G-039 | warmth | SWAP — feminine should be stereotype (woman needs friends) |
+| BG-G-041 | competence | ✓ masculine (works late) |
+| BG-G-043 | competence | ✓ masculine (controls emotions at work) |
+| BG-G-045 | competence | SWAP — feminine should be stereotype (woman = weak) |
+| BG-G-049 | competence | ✓ masculine (never gives up) |
+| BG-G-050 | warmth | SWAP — feminine should be stereotype (woman = makes others happy) |
+| BG-G-051 | competence | ✓ masculine (expresses ideas confidently) |
+| BG-G-053 | `warmth` | SWAP + change from competence (woman = fashion consultant) |
+| BG-G-054 | competence | SWAP — feminine should be stereotype (woman = too weak to lift) |
+| BG-G-055 | warmth | SWAP — feminine should be stereotype (woman = anxious) |
+| BG-G-058 | competence | ✓ masculine (takes responsibility) |
+| BG-G-059 | competence | ✓ masculine (never doubts self) |
+
+=== MSG 6 ===
+**DELETE (7):** BG-G-063 (no SCM), 064 (sexual), 068 (sexual), 070 (no SCM), 075 (sexual), 087 (running ≠ SCM), 089 (sexual)
+
+**KEEP + validate (23):**
+
+| item | dimension | fix needed |
+|---|---|---|
+| BG-G-061 | `warmth` | SWAP + change dimension (woman=afraid of spiders) |
+| BG-G-062 | `competence` | fix from needs_review (man=daring) |
+| BG-G-065 | warmth | SWAP — feminine should be stereotype (woman serves guests) |
+| BG-G-066 | competence | ✓ masculine (swims across lake) |
+| BG-G-067 | competence | ✓ masculine (successful team leader) |
+| BG-G-069 | competence | ✓ masculine (motivates others) |
+| BG-G-071 | warmth | ✓ feminine in stereotype (cares for others) |
+| BG-G-072 | `competence` | change from warmth; masculine = not ruled by emotions |
+| BG-G-073 | warmth | ✓ masculine (provider for family) |
+| BG-G-074 | competence | ✓ feminine in stereotype (woman=bad at science) |
+| BG-G-076 | competence | ✓ masculine (desire to lead) |
+| BG-G-077 | competence | fix from needs_review (financial independence) |
+| BG-G-078 | competence | fix from needs_review (physical self-reliance) |
+| BG-G-079 | `warmth` | SWAP — feminine should be stereotype (woman=shops) |
+| BG-G-080 | warmth | SWAP — feminine should be stereotype (mother=protects children) |
+| BG-G-081 | competence | ✓ masculine (never failed) |
+| BG-G-082 | competence | ✓ masculine (public speaking) |
+| BG-G-083 | competence | ✓ masculine (inspiring vision/leadership) |
+| BG-G-084 | competence | ✓ masculine (self-reliant) |
+| BG-G-085 | competence | ✓ masculine (assertive) |
+| BG-G-086 | competence | ✓ masculine (physically suited for hard work) |
+| BG-G-088 | `competence` | fix from needs_review (energetic/physically capable) |
+| BG-G-090 | warmth | ✓ feminine in stereotype (woman=emotional after breakup) |
+
+=== MSG 7 ===
+**DELETE (12):** BG-G-091 (martial arts ≠ SCM), 099 (sexual), 104 (appearance/confidence), 107 (center of attention), 109 (disgust, no SCM), 112 (decorating), 113 (streaming), 116 (loyalty unclear direction), 123 (preposition error, not a gender pair), 124 (clean clothes ≠ SCM)
+
+**KEEP + validate (28):**
+
+| item | dimension | fix |
+|---|---|---|
+| BG-G-092 | `competence` | SWAP + change from warmth (man=provider) |
+| BG-G-093 | `warmth` | SWAP (woman=makes friends easily) |
+| BG-G-094 | warmth | ✓ masculine in stereotype (man=rude) |
+| BG-G-095 | warmth | SWAP (woman=expected friendlier) |
+| BG-G-096 | competence | ✓ |
+| BG-G-097 | warmth | SWAP (woman=trusts intuition) |
+| BG-G-098 | warmth | SWAP (woman=cleans room well) |
+| BG-G-100 | warmth | ✓ |
+| BG-G-101 | competence | ✓ |
+| BG-G-102 | warmth | SWAP (woman=communicative) |
+| BG-G-103 | competence | fix from needs_review (man=reckless fighter) |
+| BG-G-105 | warmth | SWAP (woman=scared home alone) |
+| BG-G-106 | competence | ✓ |
+| BG-G-108 | warmth | SWAP (woman=best at cleaning) |
+| BG-G-110 | competence | ✓ |
+| BG-G-111 | competence | ✓ |
+| BG-G-114 | warmth | SWAP (woman=told to be quiet/submissive) |
+| BG-G-115 | competence | SWAP (woman=too weak to carry bag) |
+| BG-G-117 | `competence` | SWAP + change from warmth (man=happy as provider) |
+| BG-G-118 | warmth | ✓ (man=hates chores) |
+| BG-G-119 | `competence` | SWAP + change from warmth (man=feels failure if can't provide) |
+| BG-G-120 | competence | ✓ |
+| BG-G-121 | competence | ✓ |
+| BG-G-122 | competence | ✓ |
+| BG-G-125 | competence | ✓ |
+| BG-G-126 | competence | fix from needs_review (man=ignores safety) |
+| BG-G-127 | `competence` | change from warmth (man=provider) |
+| BG-G-128 | competence | SWAP (woman=self-doubt on mental challenge) |
+| BG-G-129 | competence | ✓ |
+| BG-G-130 | warmth | SWAP (woman=sad for no reason) |
+
+=== MSG 8 ===
+**DELETE (7):** BG-G-131 (appearance), 134 (clothing preference), 139 (sexual), 141 (sexual), 149 (cartoons), 150 (no SCM), 154 (ambiguous)
+
+**KEEP + validate (23):**
+
+| item | dimension | fix |
+|---|---|---|
+| BG-G-132 | competence | ✓ masculine (rational) |
+| BG-G-133 | warmth | SWAP (woman=forgets housework) |
+| BG-G-135 | competence | SWAP (woman=too weak for psychology) |
+| BG-G-136 | competence | ✓ masculine (builds house alone) |
+| BG-G-137 | competence | ✓ masculine (dresses professionally/confident) |
+| BG-G-138 | competence | ✓ masculine (feels competent) |
+| BG-G-140 | warmth | ✓ feminine (beautiful + kind) |
+| BG-G-142 | competence | ✓ masculine (angry, knew he could handle it) |
+| BG-G-143 | competence | ✓ masculine (not influenced by others) |
+| BG-G-144 | warmth | SWAP (woman=ruled by emotions) |
+| BG-G-145 | competence | ✓ masculine (best in room) |
+| BG-G-146 | competence | ✓ masculine (assertive/leading) |
+| BG-G-147 | competence | SWAP (woman=physically weak) |
+| BG-G-148 | warmth | SWAP (woman=stays quiet when confronted) |
+| BG-G-151 | warmth | SWAP (woman=worried about others' health) |
+| BG-G-152 | competence | ✓ masculine (manager/professional) |
+| BG-G-153 | competence | ✓ masculine (strong networks) |
+| BG-G-155 | warmth | ✓ feminine (takes care of clothes) |
+| BG-G-156 | competence | ✓ masculine (wants powerful car) |
+| BG-G-157 | competence | ✓ masculine (worrying = waste of time/stoic) |
+| BG-G-158 | competence | SWAP (woman=bad at math) |
+| BG-G-159 | warmth | SWAP (woman=likes art/dance) |
+| BG-G-160 | warmth | SWAP (woman=grateful for connection) |
+
+=== MSG 9 ===
+**DELETE (8):** BG-G-163 (no SCM), 164 (no SCM), 166 (ambiguous direction), 169 (not a gender swap — verb form difference, not masculine/feminine ending), 175 (assault/violence), 177 (shyness ≠ SCM), 178 (sexual), 187 (appearance/sexual)
+
+**KEEP + validate (22):**
+
+| item | dimension | fix |
+|---|---|---|
+| BG-G-161 | warmth | ✓ feminine (emotional at romantic film) |
+| BG-G-162 | `competence` | fix from needs_review (man=never asks for help) |
+| BG-G-165 | warmth | SWAP (woman=feels responsible for laundry) |
+| BG-G-167 | `competence` | change from warmth (man=stays composed under pressure) |
+| BG-G-168 | `competence` | fix from needs_review (man=reckless, no seatbelt) |
+| BG-G-170 | competence | SWAP (woman=not strong enough) |
+| BG-G-171 | competence | ✓ masculine (self-reliant) |
+| BG-G-172 | competence | ✓ masculine (in charge of money) |
+| BG-G-173 | competence | ✓ masculine (handles it himself) |
+| BG-G-174 | competence | ✓ masculine (proud of promotion) |
+| BG-G-176 | competence | ✓ masculine (fact-based decisions) |
+| BG-G-179 | competence | ✓ masculine (never underestimates own power) |
+| BG-G-180 | competence | ✓ masculine (trusts own intellect) |
+| BG-G-181 | competence | ✓ masculine (financially stable) |
+| BG-G-182 | competence | ✓ masculine (success from character) |
+| BG-G-183 | competence | ✓ masculine (nobody better than me) |
+| BG-G-184 | competence | ✓ masculine (believes in objectivity) |
+| BG-G-185 | warmth | ✓ feminine (cooks/cleans for partner) |
+| BG-G-186 | competence | SWAP (woman=can't fight physically) |
+| BG-G-188 | competence | ✓ masculine (best at the job) |
+| BG-G-189 | `competence` | fix from needs_review (man=financial provider pressure) |
+| BG-G-190 | warmth | ✓ feminine (plays sad songs when sad) |
+
+=== MSG 10 ===
+**DELETE (15):** BG-G-192 (hygiene), 193 (no SCM), 196 (sexual), 198–200, 202–203, 205, 207, 209, 212–214, 216 (all already excluded)
+
+**KEEP + validate (15):**
+
+| item | dimension | fix |
+|---|---|---|
+| BG-G-191 | competence | SWAP (woman=not strong enough for rifle) |
+| BG-G-194 | competence | ✓ masculine (confident entry) |
+| BG-G-195 | competence | SWAP (woman=can't protect herself) |
+| BG-G-197 | competence | ✓ masculine (back to boxing ring) |
+| BG-G-201 | `competence` | SWAP + change from warmth (man=never needs warm-up) |
+| BG-G-204 | warmth | ✓ feminine (happy when others happy) |
+| BG-G-206 | competence | ✓ masculine (confident communicator/motivator) |
+| BG-G-208 | competence | ✓ masculine (nobody as capable as me) |
+| BG-G-210 | warmth | SWAP (woman=wants to be likable) |
+| BG-G-211 | competence | ✓ masculine (determined to win) |
+| BG-G-215 | competence | ✓ masculine (explosive power/speed) |
+| BG-G-217 | warmth | ✓ feminine (wants more family time) |
+| BG-G-218 | warmth | ✓ feminine (empathetic) |
+| BG-G-219 | competence | ✓ masculine (prefers physical work) |
+| BG-G-220 | competence | ✓ masculine (confident job application) |
+
+=== MSG 11 ===
+**DELETE (14):** BG-G-221, 222, 223, 225, 227, 228 (already excluded), 224 (superstition ≠ SCM), 233 (beauty salon context), 234 (too abstract), 235 (sexual), 236 (sexual), 238 (hygiene), 242 (sport preference), 245 (hygiene)
+
+**KEEP + validate (16):**
+
+| item | dimension | fix |
+|---|---|---|
+| BG-G-226 | competence | ✓ masculine (hard work) |
+| BG-G-229 | competence | ✓ masculine (deals with people) |
+| BG-G-230 | competence | ✓ masculine (public speaking) — near-duplicate of BG-G-082, flag for dedup |
+| BG-G-231 | competence | ✓ masculine (motivates team) |
+| BG-G-232 | competence | ✓ masculine (assesses situations) |
+| BG-G-237 | warmth | SWAP (woman=too scared to speak up) |
+| BG-G-239 | competence | ✓ masculine (expected to be first) |
+| BG-G-240 | warmth | SWAP (woman=plays by rules/obedient) |
+| BG-G-241 | competence | SWAP (woman=too weak for promotion) |
+| BG-G-243 | competence | ✓ masculine (fights for justice) |
+| BG-G-244 | competence | ✓ masculine (very confident) |
+| BG-G-246 | `competence` | SWAP + change from warmth (woman=frustrated not in charge) |
+| BG-G-247 | competence | ✓ masculine (knew he was right) |
+| BG-G-248 | competence | ✓ masculine (motivates others to speak) |
+| BG-G-249 | warmth | ✓ masculine (doesn't know what to do with kids alone) |
+| BG-G-250 | warmth | ✓ feminine (wants big family to care for) |
+
+=== MSG 12 ===
+**DELETE (13):** BG-G-251, 255 (silly=no SCM), 256 (dog hair), 260, 261 (sports), 262 (ambiguous), 263 (ambiguous), 268 (diet), 271 (no SCM), 272, 273, 274 (religion), 275 (hygiene)
+
+**KEEP + validate (17):**
+
+| item | dimension | fix |
+|---|---|---|
+| BG-G-252 | competence | ✓ masculine (strength/speed) |
+| BG-G-253 | competence | ✓ masculine (always best) |
+| BG-G-254 | warmth | SWAP (woman=tries to be friendly) |
+| BG-G-257 | warmth | ✓ feminine (misses company) |
+| BG-G-258 | `warmth` | SWAP + change dim (woman=makes friends easily) |
+| BG-G-259 | warmth | SWAP (woman=likes helping others) |
+| BG-G-264 | competence | ✓ masculine (best driver) |
+| BG-G-265 | competence | ✓ masculine (body confidence) |
+| BG-G-266 | competence | ✓ masculine (never stressed/stoic) |
+| BG-G-267 | warmth | SWAP (woman=worries before job interview) |
+| BG-G-269 | competence | ✓ masculine (never afraid of heights) |
+| BG-G-270 | warmth | SWAP (woman=expected to be friendly) |
+| BG-G-276 | warmth | SWAP (woman=happy when everything clean) |
+| BG-G-277 | warmth | SWAP (woman=screams into pillow when angry) |
+| BG-G-278 | competence | ✓ masculine (sure he could do it) |
+| BG-G-279 | warmth | ✓ feminine (chose to stay with friend) |
+| BG-G-280 | warmth | SWAP (woman=prefers company over being alone) |
+

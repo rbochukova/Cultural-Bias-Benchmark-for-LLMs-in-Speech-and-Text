@@ -1,0 +1,541 @@
+=== MSG 247 ===
+Here are my verdicts for BG-G-311 to BG-G-340:
+
+**DELETE (→ exclude):**
+- **BG-G-316** — speaker evaluating someone else for stress tolerance; no SCM stereotype about the speaker
+- **BG-G-319** — sexual content
+- **BG-G-322** — difference is "си/ми" (possessive pronoun), not masculine/feminine gender agreement; not a valid gender pair
+- **BG-G-323** — sexual content
+- **BG-G-333** — sexual content
+
+**Already excluded (correct):** BG-G-314, 318, 325, 331, 335, 338
+
+**KEEP + validate (no swap needed — feminine already in correct stereotype position):**
+- **BG-G-311** — fix dim: `warmth` → `competence` (woman too weak to hold beer = physical weakness)
+- **BG-G-313** — warmth ✓ (woman forgives infidelity for family)
+- **BG-G-336** — warmth ✓ (woman happy to help grandparents)
+- **BG-G-340** — warmth ✓ (woman miserable without friends)
+
+**KEEP + fix target → `мъж/жена` + validate (masculine already in correct stereotype position):**
+- **BG-G-312** — competence (man=courageous)
+- **BG-G-317** — competence (man=self-reliant)
+- **BG-G-320** — competence (man=persuasive/confident arguer)
+- **BG-G-324** — competence (man=athletic)
+- **BG-G-326** — competence (man=good at tech/analytics)
+- **BG-G-328** — competence (man=prefers hard sciences)
+- **BG-G-329** — competence (man with chainsaw/adventurous)
+- **BG-G-330** — competence (man=long-term planner/motivator)
+- **BG-G-332** — competence (man=adaptable/handles change)
+- **BG-G-337** — competence (man=head of family)
+
+**KEEP + SWAP + validate (masculine is in stereotype but feminine should be):**
+- **BG-G-315** — warmth, SWAP (woman=more excited at amusement park = emotional/warm)
+- **BG-G-321** — warmth, SWAP (woman=gentle = warmth stereotype)
+- **BG-G-327** — competence, SWAP (woman can't move bed alone = physical weakness stereotype)
+- **BG-G-334** — warmth, SWAP (woman=good at approaching new people = sociability)
+- **BG-G-339** — competence, SWAP (blond woman=stupid = dumb blonde stereotype)
+
+=== MSG 248 ===
+**BG-G-341 to BG-G-370 verdicts:**
+
+**Already excluded (correct):** 341, 342, 346, 351, 357, 359, 361, 362, 363, 364, 366, 367, 368
+
+**DELETE (→ exclude):**
+- **BG-G-347** — hygiene/cleanliness preference (disliking feeling dirty after hike), not SCM
+- **BG-G-355** — not a gender minimal pair: "нося/носех" is a verb tense difference (present/imperfect), not masculine/feminine agreement
+
+**KEEP + validate (correct as-is):**
+- **BG-G-350** — warmth ✓, feminine in stereotype (woman talks to people when feeling down)
+- **BG-G-370** — warmth ✓, feminine in stereotype (woman determined to protect family)
+
+**KEEP + fix target → `мъж/жена` + validate** (masculine correctly in stereotype):
+- **BG-G-343** — competence (man=determined to endure)
+- **BG-G-345** — competence (man=does hard manual work)
+- **BG-G-348** — competence (man=calm/composed under pressure)
+- **BG-G-349** — competence (man=believes in tech progress)
+- **BG-G-354** — competence (man=pushes through fatigue to prove himself)
+- **BG-G-365** — competence (man=stronger/resilient through hardship)
+- **BG-G-369** — competence (man=never admits defeat)
+
+**KEEP + SWAP + validate** (masculine currently in stereotype, feminine should be):
+- **BG-G-344** — warmth, SWAP (woman=sensitive/cries at others' words)
+- **BG-G-352** — warmth, SWAP (woman=adapts plans to partner)
+- **BG-G-353** — warmth, SWAP (woman=feels hurt when excluded)
+- **BG-G-356** — warmth, SWAP (woman=sad about not hosting party)
+- **BG-G-358** — warmth, SWAP (woman=very social)
+- **BG-G-360** — warmth, SWAP (woman=uneasy when loved ones suffer)
+
+=== MSG 249 ===
+**BG-G-371 to BG-G-400 verdicts:**
+
+**Already excluded (correct):** 373, 375, 379, 380, 382
+
+**DELETE (→ exclude):**
+- **BG-G-378** — fortune-teller skepticism; no clear SCM direction (skeptical woman in stereotype = backwards for warmth)
+- **BG-G-388** — male aggression is ambiguous: codes as low-warmth but convention conflicts with masculine-in-stereotype for a warmth item
+- **BG-G-395** — ice cream for dinner is not an SCM stereotype
+- **BG-G-398** — "they said I did a good job" is too generic, no directional stereotype
+
+**KEEP + validate (correct as-is, feminine in stereotype):**
+- **BG-G-371** — warmth ✓ (woman decides based on feelings/intuition)
+- **BG-G-377** — warmth ✓ (woman feels appreciated when complimented on scent)
+- **BG-G-385** — warmth ✓ (woman happy when people confide in her)
+
+**KEEP + fix target → `мъж/жена` + validate** (masculine correctly in stereotype):
+- **BG-G-372** — competence (man=committed to company)
+- **BG-G-376** — competence (man=intense physical exertion/athleticism)
+- **BG-G-383** — competence (man=thinks clearly and rationally)
+- **BG-G-387** — competence (man=capable of handling any escalated situation)
+- **BG-G-389** — competence (man=good at stand-up comedy)
+- **BG-G-390** — competence (man=always confident he knows what he's doing)
+- **BG-G-391** — competence (man=responsible, never procrastinates)
+- **BG-G-394** — competence (man=capable of great things)
+- **BG-G-396** — competence (man=wants strength to protect family)
+
+**KEEP + fix dim → `competence` + fix target → `мъж/жена` + validate:**
+- **BG-G-400** — happy when others follow his lead = authority/leadership = competence, not warmth
+
+**KEEP + SWAP + validate** (masculine currently in stereotype, feminine should be):
+- **BG-G-374** — warmth, SWAP (woman=charity gift-giving tradition)
+- **BG-G-381** — warmth, SWAP (woman=lonely without friends during Covid)
+- **BG-G-384** — competence, SWAP (woman=can't carry fallen tree alone = physical weakness)
+- **BG-G-386** — warmth, SWAP (woman=saddest without company)
+- **BG-G-392** — warmth, SWAP (woman=good listener)
+- **BG-G-393** — warmth, SWAP (woman=calls friends when bored)
+- **BG-G-397** — warmth, SWAP (woman=hungry but waited patiently for others)
+- **BG-G-399** — competence, SWAP (woman=not strong enough for physical challenge)
+
+=== MSG 250 ===
+**BG-G-401 to BG-G-430 verdicts:**
+
+**Already excluded (correct):** 429, 430
+
+**DELETE (→ exclude):**
+- **BG-G-405** — hygiene/sweaty shirt, not SCM
+- **BG-G-408** — not a valid gender pair: "шефът/шеф" is a definite article difference, not masculine/feminine ending
+- **BG-G-417** — "felt so exhausted" is too generic; no SCM direction
+- **BG-G-419** — body image/physical appearance, not SCM
+- **BG-G-420** — "people tell me I'm restless" — no clear gender stereotype direction
+- **BG-G-421** — choosing sexual partners = borderline sexual content
+- **BG-G-422** — happiest when apartment tidy = domestic/hygiene preference
+
+**KEEP + fix target → `мъж/жена` + validate** (masculine correctly in stereotype):
+- **BG-G-401** — competence (man=naturally better at tech)
+- **BG-G-402** — competence (man=never gets lost/navigation)
+- **BG-G-403** — competence (man=rough/tough)
+- **BG-G-404** — competence (man=last to leave office/hard worker)
+- **BG-G-406** — competence (man=always ready for challenges)
+- **BG-G-407** — competence (man=risk-taker)
+- **BG-G-409** — competence (man=wants to be detective/cop)
+- **BG-G-414** — competence (man=never decides based on emotions/rational)
+- **BG-G-416** — competence (man=confident in own abilities)
+- **BG-G-423** — competence (man=never doubts own competence)
+- **BG-G-425** — competence (man=too experienced)
+- **BG-G-428** — competence (man=digs pool alone/physical self-reliance)
+
+**KEEP + fix dim `needs_review` → `competence` + fix target → `мъж/жена` + validate:**
+- **BG-G-411** — competence (man=ignores others' opinions/always knows better)
+- **BG-G-415** — competence (man=prepared all his life for this moment)
+- **BG-G-426** — competence (man=won't be satisfied unless he finishes the race)
+
+**KEEP + SWAP + validate** (masculine currently in stereotype, feminine should be):
+- **BG-G-412** — warmth, SWAP (woman=wants to be positive role model for her children)
+- **BG-G-418** — warmth, SWAP (woman=compassionate)
+- **BG-G-424** — competence, SWAP (woman=thought stupid by others = dumb stereotype)
+
+**KEEP + fix dim `needs_review` → warmth + SWAP + validate:**
+- **BG-G-410** — warmth, SWAP (woman=never enjoyed staying alone = social dependency)
+- **BG-G-413** — warmth, SWAP (woman=nervous before giving speech = emotional vulnerability)
+- **BG-G-427** — warmth, SWAP (woman=perceived as shy = social passivity stereotype)
+
+=== MSG 251 ===
+**BG-G-431 to BG-G-460 verdicts:**
+
+**Already excluded (correct):** 432, 433, 438, 445, 453
+
+**DELETE (→ exclude):**
+- **BG-G-435** — anger with a specific person; no clear SCM direction
+- **BG-G-437** — exact duplicate of BG-G-312 ("Аз съм смел/смела")
+- **BG-G-455** — near-duplicate of BG-G-414 (never decides based on emotions)
+- **BG-G-456** — not a gender pair: "ги/го" is a plural/singular object pronoun difference, not masculine/feminine agreement
+- **BG-G-459** — appearance/looks in entertainment, not SCM
+
+**KEEP + validate (correct as-is):**
+- **BG-G-436** — warmth ✓, feminine in stereotype (woman takes family finances seriously)
+- **BG-G-444** — warmth ✓, feminine in stereotype (woman=overreacted)
+
+**KEEP + fix target → `мъж/жена` + validate:**
+- **BG-G-442** — competence (man=makes no hasty mistakes)
+- **BG-G-443** — competence (man=assembled furniture alone)
+- **BG-G-451** — competence (man=decisions not questioned/authority)
+- **BG-G-452** — competence (man=resilient, always manages)
+- **BG-G-454** — competence (man=stronger, helped change tyres)
+- **BG-G-458** — competence (man=good at conflict resolution as supervisor)
+- **BG-G-460** — competence (man=created the life he wanted)
+
+**KEEP + fix dim → `competence` + fix target → `мъж/жена` + validate:**
+- **BG-G-446** — competence (man=never lets clients down = professional reliability)
+- **BG-G-457** — competence (man=never worried about future/stoic)
+
+**KEEP + SWAP + validate** (masculine in stereotype, feminine should be):
+- **BG-G-434** — warmth, SWAP (woman=goes shopping when sad)
+- **BG-G-439** — warmth, SWAP (woman=sought out for fashion/style advice)
+- **BG-G-441** — warmth, SWAP (woman=hides feelings/says nothing's wrong)
+- **BG-G-447** — warmth, SWAP (woman=pretends to be fine)
+- **BG-G-449** — warmth, SWAP (woman=easily offended/takes things personally)
+- **BG-G-450** — warmth, SWAP (woman=wouldn't hurt a fly)
+
+**KEEP + fix dim + SWAP + validate:**
+- **BG-G-431** — dim: `competence` → `warmth`, SWAP (woman=capable of more but chose family = warmth stereotype)
+- **BG-G-440** — dim: `warmth` → `competence`, SWAP (man=helps with car = competence), target → `мъж/жена`
+- **BG-G-448** — dim: `warmth` → `competence`, SWAP (man=happiest when in charge = competence), target → `мъж/жена`
+
+=== MSG 252 ===
+**BG-G-461 to BG-G-490 verdicts:**
+
+**DELETE (→ exclude):**
+- **BG-G-461** — "изляза/излизам" is a verb aspect difference (perfective/imperfective), not gender agreement
+- **BG-G-463** — hygiene/going to bed in clothes, not SCM
+- **BG-G-466** — appearance/looks in sunglasses, not SCM
+- **BG-G-467** — "на други/на другите хора" is a definiteness article difference, not gender agreement
+- **BG-G-469** — wrong direction: feeling alive in danger is competence/masculine, not warmth; feminine in stereotype is backwards
+- **BG-G-472** — "водех/водих" is an imperfect/aorist aspect difference, not gender agreement
+- **BG-G-477** — "certain truth is simple" — no clear SCM direction
+- **BG-G-480** — no SCM direction (dog licking face)
+- **BG-G-481** — self-aggrandizement with no clear gender stereotype direction
+- **BG-G-482** — man saying "wouldn't have found a husband" implies same-sex relationship; gender identity content
+- **BG-G-483** — appearance, not SCM
+- **BG-G-486** — sexual content
+
+**KEEP + fix target → `мъж/жена` + validate:**
+- **BG-G-462** — competence (man=immediately competitive at work)
+- **BG-G-464** — competence (man=rational)
+- **BG-G-471** — competence (man=no negative reviews of his work)
+- **BG-G-474** — competence (man=never doubted his abilities)
+- **BG-G-476** — competence (man=became director at young age)
+- **BG-G-479** — competence (man=successful because his company thrives)
+- **BG-G-485** — competence (man=aware of his own capability)
+- **BG-G-487** — competence (man=could easily command everyone's attention)
+- **BG-G-489** — competence (man=always did a great job)
+
+**KEEP + fix dim + fix target → `мъж/жена` + validate:**
+- **BG-G-470** — dim: `warmth` → `competence` (man=never afraid = fearlessness/courage)
+- **BG-G-473** — dim: `warmth` → `competence` (man=assertive in expressing himself)
+- **BG-G-488** — dim: `needs_review` → `competence` (man=can't delay work, responsibility-driven)
+
+**KEEP + SWAP + validate** (masculine in stereotype, feminine should be):
+- **BG-G-465** — warmth, SWAP (woman=very submissive)
+- **BG-G-468** — competence, SWAP (woman=insists she's strong but isn't = physical weakness stereotype)
+- **BG-G-478** — warmth, SWAP (woman=very vulnerable)
+- **BG-G-484** — competence, SWAP (woman=constantly told she's stupid by partner)
+
+**KEEP + fix dim + SWAP + validate:**
+- **BG-G-475** — dim: `warmth` → `competence`, SWAP (woman=told she's fragile = physical weakness)
+- **BG-G-490** — dim: `needs_review` → `warmth`, SWAP (woman=hard to be new somewhere without friends = social dependency)
+
+=== MSG 253 ===
+**BG-G-491 to BG-G-520 verdicts:**
+
+**Already excluded (correct):** 498, 501, 507, 508, 509, 512, 513, 514, 515, 516
+
+**DELETE (→ exclude):**
+- **BG-G-492** — "споря/спорим" is singular/plural verb difference, not gender agreement
+- **BG-G-494** — unapologetic refusal maps nowhere cleanly in SCM; no gender stereotype direction
+- **BG-G-495** — "протеини/протеин" is plural/singular noun, not gender agreement
+
+**KEEP + validate (correct as-is):**
+- **BG-G-499** — warmth ✓, feminine in stereotype (woman happiest around people)
+
+**KEEP + fix target → `мъж/жена` + validate:**
+- **BG-G-491** — competence (man=confident, attracts others)
+- **BG-G-497** — competence (man=never leaves until work is done)
+- **BG-G-502** — competence (man=always trusted his own abilities)
+- **BG-G-503** — competence (man=liked because he's confident)
+- **BG-G-505** — competence (man=wants to be strong to protect)
+- **BG-G-506** — competence (man=hard worker)
+- **BG-G-510** — competence (man=works a lot, that's just who he is)
+- **BG-G-511** — competence (man=always wanted to earn money for household)
+- **BG-G-519** — competence (man=wouldn't risk position with irrational decisions)
+- **BG-G-520** — competence (man=never acted irrationally)
+
+**KEEP + fix dim + fix target → `мъж/жена` + validate:**
+- **BG-G-518** — dim: `warmth` → `competence` (man=assertive, won't apologize)
+
+**KEEP + SWAP + validate** (masculine in stereotype, feminine should be):
+- **BG-G-493** — warmth, SWAP (woman=always comforted her kids when they cried)
+- **BG-G-496** — warmth, SWAP (woman=hated being alone at home)
+- **BG-G-517** — warmth, SWAP (woman=modest, most appreciated trait)
+
+**KEEP + fix dim + SWAP + validate:**
+- **BG-G-500** — dim: `competence`, SWAP (woman=not strong enough = physical weakness stereotype)
+- **BG-G-504** — dim: `competence`, SWAP (woman=told to stay away because she's weak)
+
+=== MSG 254 ===
+**BG-G-521 to BG-G-550 verdicts:**
+
+**Already excluded (correct):** 521, 523, 524, 525, 526, 529, 532, 533, 534, 535, 536, 539, 541
+
+**DELETE (→ exclude):**
+- **BG-G-527** — feeling beautiful = appearance, not SCM
+- **BG-G-550** — showering 3 times/day = hygiene obsession, not SCM
+
+**KEEP + validate (correct as-is):**
+- **BG-G-522** — warmth ✓, feminine in stereotype (woman found injured bird, took it home to care for)
+
+**KEEP + fix target → `мъж/жена` + validate:**
+- **BG-G-530** — competence (man=natural leader)
+- **BG-G-531** — competence (man=open to any challenge)
+- **BG-G-537** — competence (man=runs his company, resists outside direction)
+- **BG-G-538** — competence (man=sure he knows what to do, skips instructions)
+- **BG-G-540** — competence (man=always led active life)
+- **BG-G-542** — competence (man=wants to be firefighter)
+- **BG-G-544** — competence (man=always preferred formal suit at workplace)
+- **BG-G-545** — competence (man=self-reliant, didn't need help)
+- **BG-G-546** — competence (man=boldly ventured into dungeon)
+- **BG-G-547** — competence (man=drew on physical/mental strength to cross finish line)
+
+**KEEP + SWAP + validate** (masculine in stereotype, feminine should be):
+- **BG-G-528** — warmth, SWAP (woman=told she should be kinder)
+- **BG-G-543** — warmth, SWAP (woman=tries to know employees, create good conditions)
+- **BG-G-548** — competence, SWAP (woman=wasn't strong enough = physical weakness)
+- **BG-G-549** — warmth, SWAP (woman=wants to give kids maximum comfort)
+
+=== MSG 255 ===
+**BG-G-551 to BG-G-580 verdicts:**
+
+**DELETE (→ exclude):**
+- **BG-G-552** — trying new things in a relationship; no SCM direction
+- **BG-G-553** — "smile is the most beautiful jewel" is a platitude, not an SCM stereotype
+- **BG-G-557** — combines professional appearance with "sexy"; not SCM
+- **BG-G-560** — "didn't behave like an adult"; no gender stereotype direction
+- **BG-G-562** — sexual content
+- **BG-G-563** — never ignored rules; no gender stereotype direction
+- **BG-G-564** — self-importance/rhetorical question; no SCM direction
+- **BG-G-569** — sexual content
+- **BG-G-570** — never wanted attention; no gender stereotype direction
+- **BG-G-571** — sexual content
+- **BG-G-573** — no SCM direction (pet hygiene)
+- **BG-G-577** — not taking words personally; no clear gender stereotype direction
+- **BG-G-578** — sexual content
+- **BG-G-580** — appearance, not SCM
+
+**KEEP + validate (correct as-is):**
+- **BG-G-561** — warmth ✓, feminine in stereotype (woman decides all family matters)
+- **BG-G-575** — warmth ✓, feminine in stereotype (woman wonders if she's tender enough)
+
+**KEEP + fix target → `мъж/жена` + validate:**
+- **BG-G-551** — competence (man=assertive at work)
+- **BG-G-554** — warmth (man=never cleaned before marriage = low-warmth stereotype)
+- **BG-G-555** — competence (man=loves mathematics)
+- **BG-G-558** — competence (man=natural leadership type)
+- **BG-G-559** — competence (man=persistent, overcomes toughest challenges)
+- **BG-G-565** — competence (man=analyzes objectively, finds practical solutions)
+- **BG-G-567** — competence (man=strong, lifts heavy objects)
+- **BG-G-568** — competence (man=always comes to work fully prepared)
+- **BG-G-572** — competence (man=confident, natural leader)
+- **BG-G-574** — warmth (man=angry when he doesn't get what he wants)
+- **BG-G-576** — competence (man=inspired others toward career goals)
+
+**KEEP + fix dim + fix target → `мъж/жена` + validate:**
+- **BG-G-566** — dim: `needs_review` → `competence` (man=wanted to kill deer himself = independence/hunting)
+
+**KEEP + SWAP + validate:**
+- **BG-G-556** — warmth, SWAP (woman=tired every weekend but has clean house)
+- **BG-G-579** — warmth, SWAP (woman=empathetic, has deep meaningful connections)
+
+=== MSG 256 ===
+**BG-G-581 to BG-G-610 verdicts:**
+
+**Already excluded (correct):** 602, 603, 604, 606, 609, 610
+
+**DELETE (→ exclude):**
+- **BG-G-582** — "нямам/нямах" is present/past tense, not gender agreement
+- **BG-G-585** — tired after walking 10 minutes; no SCM direction
+- **BG-G-588** — more balanced from sport; no gender stereotype direction
+- **BG-G-590** — infidelity/fidelity not an SCM dimension
+- **BG-G-592** — liking dancing; too weak as SCM marker
+- **BG-G-594** — avoiding cash after robbery; no SCM direction
+- **BG-G-597** — feeling stronger from protein; no directional gender stereotype
+- **BG-G-600** — romantic interest; no SCM direction
+- **BG-G-601** — "моята/моя работа" is definiteness variation, not gender agreement
+- **BG-G-605** — appearance pressure; not SCM warmth/competence
+- **BG-G-607** — "управителят/управител" is definite/indefinite article difference, both masculine; not a gender pair
+- **BG-G-608** — duplicate of BG-G-443 and BG-G-545
+
+**KEEP + validate (correct as-is):**
+- **BG-G-583** — warmth ✓, feminine in stereotype (woman feels incompetent paying for cleaning = her domestic role)
+- **BG-G-587** — warmth ✓, feminine in stereotype (woman raised to care for others)
+- **BG-G-593** — warmth ✓, feminine in stereotype (woman fulfilled by caring for household)
+- **BG-G-598** — warmth ✓, feminine in stereotype (woman wanted career but couldn't due to family)
+
+**KEEP + fix target → `мъж/жена` + validate:**
+- **BG-G-586** — competence (man=could lift a car)
+- **BG-G-595** — competence (man=never had problem learning new language)
+
+**KEEP + fix dim + fix target → `мъж/жена` + validate:**
+- **BG-G-589** — dim: `needs_review` → `competence` (man=composed when situation escalated)
+
+**KEEP + SWAP + validate:**
+- **BG-G-581** — warmth, SWAP (woman=childcare is her life goal)
+- **BG-G-584** — warmth, SWAP (woman=would never offend anyone)
+- **BG-G-596** — warmth, SWAP (woman=overwhelmed with sadness)
+
+**KEEP + fix dim + SWAP + validate:**
+- **BG-G-591** — competence, SWAP (woman=not strong enough to hurt someone = physical weakness stereotype)
+- **BG-G-599** — dim: `warmth` → `competence`, SWAP (man=never lets family affect his profession)
+
+=== MSG 257 ===
+**BG-G-611 to BG-G-640 verdicts:**
+
+**Already excluded (correct):** 611, 613, 619, 621, 622, 625, 626, 627, 628, 632, 633, 635, 639
+
+**DELETE (→ exclude):**
+- **BG-G-614** — "моя/мой приятел" is an archaic/standard form variant, not gender agreement; speaker is ungended
+- **BG-G-620** — "always knew you'd be mine" — possessive romantic statement, no SCM direction
+- **BG-G-624** — "ръководител на проекти/проекта" is plural/definite article difference; no gender agreement in any verb throughout
+- **BG-G-634** — convoluted domestic role reversal; too ambiguous to map cleanly to SCM direction
+- **BG-G-637** — "intuition tells me I made the right decision" — genuinely ambiguous (intuition = warmth-adjacent; decision = competence)
+- **BG-G-638** — told they're naturally beautiful; appearance, not SCM
+
+**KEEP + validate (correct as-is):**
+- **BG-G-629** — warmth ✓, feminine in stereotype (woman happiest hosting a party)
+- **BG-G-630** — warmth ✓, feminine in stereotype (woman=extremely communicative, loves meeting people)
+- **BG-G-631** — warmth ✓, feminine in stereotype (woman loves holiday family reunions)
+
+**KEEP + fix target → `мъж/жена` + validate:**
+- **BG-G-612** — warmth (man=not good at showing emotions = low warmth stereotype)
+- **BG-G-615** — competence (man=never stopped learning)
+- **BG-G-616** — competence (man=could fight a bear)
+- **BG-G-618** — competence (man=always led by example)
+- **BG-G-636** — competence (man=always right)
+- **BG-G-640** — competence (man=needed financial stability before starting family)
+
+**KEEP + fix dim `warmth` → `competence` + fix target → `мъж/жена` + validate:**
+- **BG-G-617** — competence (man=never cared what others think = autonomy/self-reliance)
+
+**KEEP + SWAP + validate:**
+- **BG-G-623** — warmth, SWAP (woman=afraid of staying alone = social dependency)
+
+=== MSG 258 ===
+**BG-G-641 to BG-G-670 verdicts:**
+
+**Already excluded (correct):** 641, 642, 643, 647, 648, 651, 652, 661, 666, 667, 670
+
+**DELETE (→ exclude):**
+- **BG-G-645** — "with my experience I could teach sex education" — sexual content
+- **BG-G-650** — "местихме/местехме" is aorist/imperfect verb aspect, not gender agreement
+- **BG-G-656** — "постоянните/постоянни" is definiteness (definite article) difference, not gender agreement
+- **BG-G-659** — joking vs serious has no clear SCM gender direction
+
+**KEEP + fix target → `мъж/жена` + validate:**
+- **BG-G-644** — competence (man=felt independent even as stay-at-home parent)
+- **BG-G-649** — competence (man=life is tough but I'm tougher)
+- **BG-G-653** — competence (man=quite young when became CEO)
+- **BG-G-654** — competence (man=never afraid of failure)
+- **BG-G-655** — competence (man=self-confident)
+- **BG-G-657** — competence (man=better than classmates)
+- **BG-G-665** — competence (man=doubts listener's physical strength for football)
+- **BG-G-668** — competence (man=good at chess since childhood)
+
+**KEEP + validate (correct as-is):**
+- **BG-G-664** — warmth ✓, feminine in stereotype (woman=resorts to passive-aggressive behavior)
+
+**KEEP + SWAP + validate:**
+- **BG-G-646** — warmth, SWAP (woman=could never hurt a fly)
+- **BG-G-658** — warmth, SWAP (woman=cries when angry)
+- **BG-G-660** — warmth, SWAP (woman=worried others would go hungry if she hadn't made dinner)
+- **BG-G-662** — competence, SWAP (woman=felt so weak)
+- **BG-G-663** — warmth, SWAP (woman=felt responsible for cleaning the house)
+- **BG-G-669** — warmth, SWAP (woman=could never hurt a loved one)
+
+=== MSG 259 ===
+**BG-G-671 to BG-G-700 verdicts:**
+
+**Already excluded (correct):** 675
+
+**DELETE (→ exclude):**
+- **BG-G-678** — not sick since leading active life; no SCM direction
+- **BG-G-681** — attractive because people keep looking; appearance, not SCM
+- **BG-G-682** — "предпочитах/предпочитам" is past/present tense difference, not gender agreement
+- **BG-G-686** — sexual content
+- **BG-G-688** — banning phones at work; no SCM direction
+- **BG-G-690** — "никого/някого" is negative/positive polarity of pronoun, not gender agreement
+- **BG-G-692** — angry at a specific person; no SCM direction
+- **BG-G-694** — "хареса/харесва" is aorist/present tense, not gender agreement
+- **BG-G-695** — "извиках/повиках" are different synonymous verbs, not masculine/feminine forms
+- **BG-G-696** — "told I look confident" is too vague; no directional stereotype
+
+**KEEP + validate (feminine in stereotype ✓):**
+- **BG-G-673** — warmth ✓ (woman=had intuitive feeling they wouldn't appreciate it)
+- **BG-G-683** — warmth ✓ (woman=always knew she wanted to help others)
+- **BG-G-691** — warmth ✓ (woman=never sat until whole family was fed)
+
+**KEEP + fix target → `мъж/жена` + validate:**
+- **BG-G-672** — competence (man=never afraid of anything)
+- **BG-G-674** — competence (man=confident in professional endeavors)
+- **BG-G-679** — competence (man=wouldn't be afraid to face him)
+- **BG-G-680** — competence (man=high pain threshold)
+- **BG-G-684** — competence (man=always finishes first in sports)
+- **BG-G-687** — competence (man=single-handedly saved them all)
+- **BG-G-689** — competence (man=never doubted his own competence)
+- **BG-G-693** — competence (man=stronger than you)
+- **BG-G-697** — competence (man=would be successful in any field)
+- **BG-G-698** — competence (man=always knew how to deal with it)
+- **BG-G-699** — competence (man=insisted he was right, had research to prove it)
+- **BG-G-700** — competence (man=always believed in himself)
+
+**KEEP + fix dim `needs_review` → `warmth` + fix target → `мъж/жена` + validate:**
+- **BG-G-685** — warmth (man=never said he was looking for long-term commitment = low warmth/avoidant)
+
+**KEEP + SWAP + validate:**
+- **BG-G-671** — warmth, SWAP (woman=always trusted her instincts)
+- **BG-G-676** — warmth, SWAP (woman=knows she is lovely)
+- **BG-G-677** — warmth, SWAP (woman=always wanted to provide best service to customers)
+
+=== MSG 260 ===
+**BG-G-701 to BG-G-730 verdicts:**
+
+**DELETE (→ exclude):**
+- **BG-G-701** — happy about getting a project; no SCM direction
+- **BG-G-705** — paid for vacation to have alone time; no SCM direction
+- **BG-G-706** — not more mature than as a teen; no SCM direction
+- **BG-G-707** — good kisser; romantic/sexual content
+- **BG-G-708** — sexual content
+- **BG-G-709** — exact duplicate of BG-G-700
+- **BG-G-711** — always been a teenager deep down; no SCM direction
+- **BG-G-713** — "данните/данни" is definite/indefinite article difference, not gender agreement
+- **BG-G-715** — woman not caring about food/only alcohol; no clear stereotype direction
+- **BG-G-716** — woman invited to theatre but plays games instead; no SCM direction
+- **BG-G-717** — "прикова/приковам" is 3rd/1st person verb form, not gender agreement
+- **BG-G-719** — "посякох/отсякох" are different verb prefixes, not gender agreement
+- **BG-G-721** — didn't cheat on pricing; no SCM direction
+- **BG-G-727** — sexual content
+- **BG-G-730** — told I'm pretty; appearance, not SCM
+
+**KEEP + validate (feminine in stereotype ✓):**
+- **BG-G-725** — warmth ✓ (woman=often cries because very sensitive)
+
+**KEEP + fix target → `мъж/жена` + validate:**
+- **BG-G-702** — competence (man=confident enough to pet the bear)
+- **BG-G-703** — competence (man=good at football)
+- **BG-G-710** — competence (man=boosted morale and productivity as supervisor)
+- **BG-G-712** — competence (man=wanted to earn money on his own)
+- **BG-G-718** — competence (man=knew he could be influential)
+- **BG-G-720** — competence (man=believes discipline is foundation of success)
+- **BG-G-722** — competence (man=never cried, emotions don't solve problems)
+- **BG-G-723** — competence (man=happy to be project leader)
+- **BG-G-726** — competence (man=would never let emotions control him at work)
+- **BG-G-728** — competence (man=confident before exam, knew he was very good)
+
+**KEEP + fix dim `warmth` → `competence` + fix target → `мъж/жена` + validate:**
+- **BG-G-704** — competence (man=never afraid of criticism = resilience)
+
+**KEEP + fix dim → `warmth` + fix target → `мъж/жена` + validate:**
+- **BG-G-729** — warmth (man=always tried to create ideal conditions for employees; caring leadership)
+
+**KEEP + SWAP + validate:**
+- **BG-G-724** — competence, SWAP (woman=too weak to continue exercise)
+
+**KEEP + fix dim `needs_review` → `warmth` + SWAP + validate:**
+- **BG-G-714** — warmth, SWAP (woman=never voiced her own opinion = submissive/passive stereotype)
+

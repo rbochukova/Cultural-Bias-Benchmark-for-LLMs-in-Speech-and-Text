@@ -110,7 +110,7 @@ def _synthesise(
             elif resp.status_code == 429:
                 print(f"\n    rate limited — waiting {backoff}s ...", end=" ")
                 time.sleep(backoff)
-                backoff = min(backoff * 2, 60)
+                backoff = min(backoff * 2, 120)
             else:
                 print(f"\n    HTTP {resp.status_code}: {resp.text[:120]}", end=" ")
                 return False
@@ -206,7 +206,7 @@ def main() -> None:
             print(f"\r  {i}/{len(pending)} ({pct:.0f}%)  "
                   f"ok={succeeded}  failed={failed}", end="", flush=True)
 
-        time.sleep(0.1)  # stay within Azure free-tier rate limits
+        time.sleep(0.5)  # stay within Azure free-tier rate limits
 
     print()
     print(f"\n{'=' * 55}")

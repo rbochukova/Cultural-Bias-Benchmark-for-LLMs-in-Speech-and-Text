@@ -1,114 +1,129 @@
 # Cultural Bias Benchmark for LLMs in Speech and Text
 
-Explain in short what this repository is. Mind the target audience.
-No need to go into too much technical details if you expect some people would just use it as end-users 
-and don't care about the internals (so focus on what the code really *does*), not how.
-The *_How it works_* section below would contain more technical details for curious people.
+A multilingual benchmark that measures cultural bias in large language models (LLMs) under two conditions — standard text prompts and a speech pipeline where audio is first transcribed by Whisper before being scored by the LLM.
 
-If applicable, you can also show an example of the final output.
+The benchmark covers **English, French, and Bulgarian** and probes biases along the Stereotype Content Model (SCM) dimensions of **warmth** and **competence**. Three research questions are investigated:
 
-![](media/examples/emojis.png)
+- **RQ1 (Cultural grounding):** Do bias scores differ by language, SCM dimension, and item origin (parallel-translated vs. culture-specific native)?
+- **RQ2 (Pipeline attribution):** How large is the ASR-attributable modality gap (ΔASR) when comparing Whisper-to-LLM against oracle-transcript-to-LLM?
+- **RQ3 (Error-type mechanism):** Which ASR error types — negation changes, deletion-heavy segments, trait-cue substitutions — most strongly predict SCM decision flips, beyond raw WER?
 
 ---
 
+## Repository Structure
 
-## Project Folder Structure
-
-Explain briefly what's where so people can find their way around. For example:
-
-There are the following folders in the structure:
-
-1) [`resources`](./resources): Random nice resources, e.g. [`useful links`](./resources/README.md)
-1) [`src`](./src): Folder for all source files specific to this project
-1) [`scripts`](./scripts): Folder with example scripts for performing different tasks (could serve as usage documentation)
-1) [`tests`](./tests) Test example
-1) [`media`](./media): Folder containing media files (icons, video)
-1) ...
-
-OR
-
-Or use something like `tree` to include the overall structure with preferred level of detail (`-L 2` or `-d` or `-a`...)
-```buildoutcfg
-├── media --> you can still add comments and descriptions in this tree
-│   └── examples
-├── resources --> a lot of useful links here
-├── scripts
-├── src --
-└── tests
+```
+├── data/
+│   ├── stimuli_seed.csv           # 6,893 validated SCM forced-choice probes (EN/FR/BG)
+│   ├── results/
+│   │   ├── text/                  # LLM inference results (natural / grammar / typical variants)
+│   │   └── speech/                # Whisper → LLM inference results (natural / grammar / typical)
+│   └── audio/                     # TTS-generated audio clips (not tracked in git)
+├── src/
+│   ├── inference_text.py          # Score stimuli with a text LLM
+│   ├── inference_speech.py        # TTS → Whisper → LLM pipeline
+│   ├── tts.py                     # Text-to-speech via OpenAI TTS
+│   ├── asr.py                     # Whisper ASR transcription
+│   ├── score.py                   # BiasScore + RQ1/RQ2 statistical analyses
+│   ├── visualize.py               # All thesis figures
+│   ├── rq3_error_types.py         # RQ3 logistic regression (error-type mechanism)
+│   └── add_*.py                   # Dataset curation scripts
+├── reports/figures/               # Generated figures (PNG)
+├── notebooks/
+│   └── eda_datasets.ipynb         # Exploratory data analysis
+├── tests/
+│   └── test_stimulus.py           # Stimulus validation tests
+├── requirements.txt               # Project dependencies
+└── requirements_frozen.txt        # Fully pinned environment snapshot
 ```
 
-
-
-If you are lacking ideas on how to structure your code at the first place, take a look at [`CookieCutter`](https://drivendata.github.io/cookiecutter-data-science/)
-
 ---
-
 
 ## Installation
 
-Explain how to set up everything. 
-Let people know if there are weird dependencies - if so feel free to add links to guides and tutorials.
+Requires **Python 3.10**.
 
-A person should be able to clone this repo, follow your instructions blindly, and still end up with something *fully working*!
+```bash
+git clone https://github.com/rbochukova/Cultural-Bias-Benchmark-for-LLMs-in-Speech-and-Text
+cd Cultural-Bias-Benchmark-for-LLMs-in-Speech-and-Text
+pip install -r requirements.txt
+```
 
-1) Clone this repository:
-    ```bash
-    git clone https://github.com/Amsterdam-Internships/InternshipAmsterdamGeneral
-    ```
+Copy `.env.example` to `.env` and add your OpenAI API key:
 
-1) If you are using submodules don't forget to include `--recurse-submodules` to the step above or mention that people can still do it afterwards:
-   ```bash
-   git submodule update --init --recursive
-   ```
+```
+OPENAI_API_KEY=sk-...
+```
 
-1) Install all dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
 ---
-
 
 ## Usage
 
-Explain example usage, possible arguments, etc. E.g.:
+### Text condition (RQ1)
 
-To train... 
+```bash
+# Score all stimuli with GPT-4o-mini (natural prompt variant)
+python src/inference_text.py --model gpt-4o-mini
 
+# Run statistical analyses and print results table
+python src/score.py
 
+# Generate all figures
+python src/visualize.py --no-show
 ```
-$ python train.py --some-importang-argument
+
+### Speech condition (RQ2)
+
+```bash
+# Generate audio with TTS
+python src/tts.py
+
+# Transcribe with Whisper large-v3, then score with LLM
+python src/inference_speech.py --asr-model large-v3 --llm-model gpt-4o-mini
+
+# Analyses including ΔASR are printed by score.py automatically
+# when speech results are present
+python src/score.py
 ```
 
-If there are too many command line arguments, you can add a nice table with explanation (thanks, [Diana Epureano](https://www.linkedin.com/in/diana-epureanu-235104153/)!)
+### Prompt variants
 
-|Argument | Type or Action | Description | Default |
-|---|:---:|:---:|:---:|
-|`--batch_size`| int| `Batch size.`|  32|
-|`--device`| str| `Training device, cpu or cuda:0.`| `cpu`|
-|`--early-stopping`|  `store_true`| `Early stopping for training of sparse transformer.`| True|
-|`--epochs`| int| `Number of epochs.`| 21|
-|`--input_size`|  int| `Input size for model, i.e. the concatenation length of te, se and target.`| 99|
-|`--loss`|  str|  `Type of loss to be used during training. Options: RMSE, MAE.`|`RMSE`|
-|`--lr`|  float| `Learning rate.`| 1e-3|
-|`--train_ratio`|  float| `Percentage of the training set.`| 0.7|
-|...|...|...|...|
+Both scripts accept `--prompt-variant grammar` and `--prompt-variant typical` to replicate the robustness checks.
 
+### RQ3 error-type analysis
 
-Alternatively, as a way of documenting the intended usage, you could add a `scripts` folder with a number of scripts for setting up the environment, performing training in different modes or different tasks, evaluation, etc (thanks, [Tom Lotze](https://www.linkedin.com/in/tom-lotze/)!)
+```bash
+python src/rq3_error_types.py
+```
+
+Outputs a logistic regression table (`flip ~ WER + error_type_features + lang + dim`) and saves a two-panel forest plot to `reports/figures/rq3_logreg.png`.
 
 ---
 
+## Key Results (GPT-4o-mini, Whisper large-v3)
 
-## How it works
+| Condition | BiasScore | vs. null (0.50) |
+|---|---|---|
+| Text – overall | 0.442 | below null (anti-stereotypical lean) |
+| Speech – overall | 0.452 | below null |
+| ΔASR (overall) | +0.010 | small positive modality gap |
 
-You can explain roughly how the code works, what the main components are, how certain crucial steps are performed...
+- **FR/warmth** is the only language × dimension cell with a significant bias score after FDR correction (negative / anti-stereotypical direction).
+- **ΔASR** is consistent but small across prompt variants (natural: +0.010, grammar: +0.021, typical: −0.002).
+- **RQ3:** deletion-heavy segments (OR ≈ 4.5) and negation flips (OR ≈ 3.0) are the strongest predictors of SCM decision flips beyond WER alone (LR test χ²(5) = 19.1, p = .002).
 
 ---
+
 ## Acknowledgements
 
+Stimuli are derived from or inspired by:
+- [StereoSet](https://github.com/moinnadeem/StereoSet) (Nadeem et al., 2021)
+- [CrowS-Pairs](https://github.com/nyu-mll/crows-pairs) (Nangia et al., 2020)
+- [French CrowS-Pairs](https://github.com/pixelastic/crows-pairs) (Névéol et al., 2022)
+- [SHADES](https://github.com/antndlcrx/shades) (de la Croix, 2024)
+- [WinoBias](https://github.com/uclanlp/corefBias) (Zhao et al., 2018)
 
-Don't forget to acknowledge any work by others that you have used for your project. Add links and check whether the authors have explicitly stated citation preference for using the DOI or citing a paper or so. 
-For example:
+ASR: [OpenAI Whisper](https://github.com/openai/whisper) (Radford et al., 2023).
+LLM scoring: [OpenAI API](https://platform.openai.com/).
 
-Our code uses [YOLOv5](https://github.com/ultralytics/yolov5) [![DOI](https://zenodo.org/badge/264818686.svg)](https://zenodo.org/badge/latestdoi/264818686)
-
+MSc thesis project — Information Studies (Data Science track), University of Amsterdam, 2025.

@@ -296,11 +296,20 @@ def fig_logreg(model, save_path: pathlib.Path) -> None:
     hi  = np.exp(conf.loc[keep, 1])
     pv  = pvals[keep]
 
-    # Drop predictors with infinite/NaN OR (e.g. complete separation)
+    # Drop predictors with infinite/NaN OR (complete separation or quasi-separation).
+    # insertion_heavy is excluded here because it has only 5 positive cases and 0 flips
+    # among those cases — the MLE pushes its coefficient to −∞ (perfect non-predictor
+    # in this sample).  This is a data-sparsity artefact, not a substantive finding;
+    # it should be noted as a limitation (insufficient N for insertion-heavy ASR errors).
     finite_mask = np.isfinite(ors.values) & np.isfinite(lo.values) & np.isfinite(hi.values)
     dropped = [k for k, f in zip(keep, finite_mask) if not f]
     if dropped:
-        print(f"NOTE: excluded from forest plot (non-finite OR): {dropped}")
+        print(f"NOTE: excluded from forest plot (non-finite OR — likely complete separation): {dropped}")
+        for d in dropped:
+            if d == "insertion_heavy":
+                print(f"  insertion_heavy: N=5 cases, 0 flips — "
+                      f"too few observations to estimate effect; "
+                      f"treat as insufficient data, not evidence of no effect.")
     keep = [k for k, f in zip(keep, finite_mask) if f]
     ors  = ors[keep]
     lo   = lo[keep]

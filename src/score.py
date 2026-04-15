@@ -1112,6 +1112,70 @@ def main() -> None:
         print(f"  Mean WER_A : {speech_df['wer_A'].mean():.3f}")
         pct_perfect = 100 * (speech_df["wer_S"] == 0).mean()
         print(f"  Items with WER_S=0 : {pct_perfect:.1f}%")
+
+        # ── Speech variant robustness ─────────────────────────────────────────
+        speech_grammar_path = SPEECH_DIR / f"{safe_asr}_{safe_llm}_grammar_results.csv"
+        speech_typical_path = SPEECH_DIR / f"{safe_asr}_{safe_llm}_typical_results.csv"
+
+        speech_variant_dfs: dict[str, pd.DataFrame] = {"natural": speech_df}
+        if speech_grammar_path.exists():
+            sg = pd.read_csv(speech_grammar_path, encoding="utf-8")
+            if args.lang:
+                sg = sg[sg["language"] == args.lang]
+            speech_variant_dfs["grammar"] = sg
+        if speech_typical_path.exists():
+            st = pd.read_csv(speech_typical_path, encoding="utf-8")
+            if args.lang:
+                st = st[st["language"] == args.lang]
+            speech_variant_dfs["typical"] = st
+
+        if len(speech_variant_dfs) > 1:
+            print(f"\n── [RQ2+] Speech Prompt-Variant Robustness ──")
+            print(f"  ΔASR = BiasScore(speech) − BiasScore(text) across prompt variants")
+
+            sv_rows = []
+            for vname, sv_df in speech_variant_dfs.items():
+                merged_sv = text_df[
+                    ["item_id", "language", "dimension", "chose_stereotype"]
+                ].merge(
+                    sv_df[["item_id", "chose_stereotype"]],
+                    on="item_id", suffixes=("_text", "_speech")
+                )
+                if len(merged_sv) == 0:
+                    continue
+                overall_delta = (
+                    merged_sv["chose_stereotype_speech"].mean()
+                    - merged_sv["chose_stereotype_text"].mean()
+                )
+                bs_text   = merged_sv["chose_stereotype_text"].mean()
+                bs_speech = merged_sv["chose_stereotype_speech"].mean()
+                sv_rows.append({
+                    "variant":  vname,
+                    "N":        len(merged_sv),
+                    "BS_text":  round(bs_text, 4),
+                    "BS_speech": round(bs_speech, 4),
+                    "ΔASR":    round(overall_delta, 4),
+                })
+                # Per language × dimension breakdown
+                for (lang, dim), grp in merged_sv.groupby(["language", "dimension"]):
+                    if len(grp) == 0:
+                        continue
+                    d = grp["chose_stereotype_speech"].mean() - grp["chose_stereotype_text"].mean()
+                    sv_rows[-1][f"ΔASR_{lang}_{dim}"] = round(d, 4)
+
+            sv_tbl = pd.DataFrame(sv_rows)
+            cols_order = ["variant", "N", "BS_text", "BS_speech", "ΔASR"]
+            extra_cols = [c for c in sv_tbl.columns if c not in cols_order]
+            print()
+            print(sv_tbl[cols_order + extra_cols].to_string(index=False))
+
+            # Summary: range of ΔASR values across variants
+            dasr_vals = [r["ΔASR"] for r in sv_rows]
+            print(f"\n  ΔASR range across variants: "
+                  f"[{min(dasr_vals):+.4f}, {max(dasr_vals):+.4f}]  "
+                  f"(max spread = {max(dasr_vals) - min(dasr_vals):.4f})")
+            print(f"  Interpretation: {'consistent' if max(dasr_vals) - min(dasr_vals) < 0.01 else 'variant-sensitive'} "
+                  f"across prompt phrasings.")
     else:
         print(f"\n(Speech results not found — run inference_speech.py to add speech condition)")
 

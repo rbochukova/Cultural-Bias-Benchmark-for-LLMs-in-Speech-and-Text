@@ -12,8 +12,10 @@ Figures produced
 4.  logit_dist.png         — Distribution of logit_diff by language
 5.  cue_comparison.png     — Explicit-cue vs behavioural subgroup BiasScore
 6.  target_group_analysis.png — Heatmap by target_group × lang/dim + native vs translated dot plot
-7.  variant_robustness.png    — BiasScore / logit-diff / delta across natural|grammar|typical
-8.  model_comparison.png      — Three-way: gpt-4o-mini natural | grammar | mDeBERTa PLL
+7.  variant_robustness.png         — BiasScore / logit-diff / delta across natural|grammar|typical
+8.  model_comparison.png           — Three-way: gpt-4o-mini natural | grammar | mDeBERTa PLL
+9a. speech_comparison.png          — Text vs speech BiasScore + ΔASR (RQ2)
+9b. speech_variant_robustness.png  — ΔASR across natural|grammar|typical speech variants (robustness)
 
 All figures are saved to reports/figures/ (created if absent).
 
@@ -889,7 +891,102 @@ def fig_model_comparison(show: bool) -> None:
     plt.close()
 
 
-# ── Figure 9: Speech comparison — text vs speech BiasScore + ΔASR ────────────
+# ── Figure 9a: Speech variant robustness — ΔASR across prompt phrasings ──────
+
+def fig_speech_variant_robustness(
+    text_df: pd.DataFrame,
+    speech_dfs: dict,        # {"natural": df, "grammar": df, "typical": df}
+    asr_model: str,
+    model_name: str,
+    show: bool,
+) -> None:
+    """
+    Grouped-bar chart: ΔASR = BiasScore(speech) − BiasScore(text) per
+    language × dimension cell, one bar per speech prompt variant
+    (natural / grammar / typical).
+
+    Checks robustness of the modality gap across prompt phrasings.
+    A consistent pattern across all three variants supports the conclusion
+    that ΔASR reflects ASR-introduced distortion rather than prompt artefacts.
+    """
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as mpatches
+
+    cells = [
+        ("en", "warmth"), ("en", "competence"),
+        ("fr", "warmth"), ("fr", "competence"),
+        ("bg", "warmth"), ("bg", "competence"),
+    ]
+    cell_labels = [f"{l.upper()}\n{d}" for l, d in cells]
+
+    variants   = list(speech_dfs.keys())
+    var_colors = {"natural": "#4C72B0", "grammar": "#DD8452", "typical": "#55A868"}
+    n_var  = len(variants)
+    x      = np.arange(len(cells))
+    width  = 0.22
+    offsets = np.linspace(-(n_var - 1) / 2, (n_var - 1) / 2, n_var) * width
+
+    # Pre-compute ΔASR per cell per variant
+    gaps: dict[str, list] = {v: [] for v in variants}
+    for vname, sp_df in speech_dfs.items():
+        merged = text_df[["item_id", "language", "dimension", "chose_stereotype"]].merge(
+            sp_df[["item_id", "chose_stereotype"]],
+            on="item_id", suffixes=("_text", "_speech")
+        )
+        for lang, dim in cells:
+            grp = merged[(merged["language"] == lang) & (merged["dimension"] == dim)]
+            if len(grp) == 0:
+                gaps[vname].append(float("nan"))
+            else:
+                gaps[vname].append(
+                    grp["chose_stereotype_speech"].mean()
+                    - grp["chose_stereotype_text"].mean()
+                )
+
+    fig, ax = plt.subplots(figsize=(11, 5))
+
+    for k, vname in enumerate(variants):
+        ax.bar(x + offsets[k], gaps[vname], width,
+               color=var_colors.get(vname, "#888888"), alpha=0.85,
+               edgecolor="white", linewidth=0.5, label=vname)
+
+    ax.axhline(0, color="black", linestyle="-", linewidth=1.0, zorder=3)
+    ax.set_xticks(x)
+    ax.set_xticklabels(cell_labels, fontsize=9)
+    ax.set_ylabel("ΔASR  (BiasScore_speech − BiasScore_text)", fontsize=10)
+    ax.set_title(
+        f"Speech Prompt-Variant Robustness: ΔASR per Cell\n"
+        f"ASR: {asr_model}  ·  LLM: {model_name}  ·  "
+        f"{'|'.join(variants)}",
+        fontsize=10, pad=8,
+    )
+
+    legend_handles = [
+        mpatches.Patch(color=var_colors.get(v, "#888888"), alpha=0.85, label=v)
+        for v in variants
+    ] + [plt.Line2D([0], [0], color="black", linestyle="-", label="no gap (0)")]
+    ax.legend(handles=legend_handles, fontsize=8.5, loc="upper right", framealpha=0.9)
+
+    # Annotate max spread per cell
+    for i, (lang, dim) in enumerate(cells):
+        vals = [gaps[v][i] for v in variants if not pd.isna(gaps[v][i])]
+        if len(vals) >= 2:
+            spread = max(vals) - min(vals)
+            if spread > 0.015:
+                ax.text(x[i], ax.get_ylim()[0] + 0.002,
+                        f"Δ{spread:.2f}", ha="center", va="bottom",
+                        fontsize=7, color="darkred", style="italic")
+
+    plt.tight_layout()
+    out = FIG_DIR / "speech_variant_robustness.png"
+    plt.savefig(out, dpi=150, bbox_inches="tight")
+    print(f"  Saved: {out.relative_to(ROOT)}")
+    if show:
+        plt.show()
+    plt.close()
+
+
+# ── Figure 9b: Speech comparison — text vs speech BiasScore + ΔASR ───────────
 
 def fig_speech_comparison(text_df: pd.DataFrame, speech_df: pd.DataFrame,
                            asr_model: str, model_name: str, show: bool) -> None:
@@ -1079,14 +1176,26 @@ def main() -> None:
     fig_variant_robustness(show)
     fig_model_comparison(show)
 
-    # RQ2 speech comparison figure (skipped if speech results not available)
+    # RQ2 speech figures (skipped if speech results not available)
     safe_model   = args.model.replace("/", "-")
     speech_path  = SPEECH_DIR / f"large-v3_{safe_model}_results.csv"
     if speech_path.exists():
         speech_df = pd.read_csv(speech_path, encoding="utf-8")
         fig_speech_comparison(df, speech_df, "large-v3", args.model, show)
+
+        # Speech variant robustness figure — load grammar/typical if present
+        speech_dfs: dict = {"natural": speech_df}
+        for vname in ("grammar", "typical"):
+            vpath = SPEECH_DIR / f"large-v3_{safe_model}_{vname}_results.csv"
+            if vpath.exists():
+                speech_dfs[vname] = pd.read_csv(vpath, encoding="utf-8")
+        if len(speech_dfs) >= 2:
+            fig_speech_variant_robustness(df, speech_dfs, "large-v3", args.model, show)
+        else:
+            print(f"  SKIP speech_variant_robustness.png: need ≥2 speech variant files")
     else:
-        print(f"  SKIP speech_comparison.png: {speech_path.name} not found")
+        print(f"  SKIP speech_comparison.png / speech_variant_robustness.png: "
+              f"{speech_path.name} not found")
 
     print(f"\nDone. All figures saved to {FIG_DIR.relative_to(ROOT)}")
 

@@ -1,8 +1,6 @@
 """
 Ingests English nationality items from the CrowS-Pairs dataset into stimuli_seed.csv.
-Items where stereotype == anti-stereotype after normalisation are skipped.
-Duplicate sentences (same sent_stereotype as an existing item) are also skipped.
-
+Items where stereotype == anti-stereotype after normalisation are skipped. Duplicate sentences are also skipped.
 dimension and target are left blank for manual annotation after ingestion.
 """
 
@@ -98,9 +96,9 @@ def main() -> None:
             "parallel_group_id":    None,
             "language":             "en",
             "origin":               "native",
-            "dimension":            "",       # fill in manually
+            "dimension":            "",      
             "target_group":         "nationality",
-            "target":               "",       # fill in manually
+            "target":               "",      
             "sent_stereotype":      row["sent_stereotype"].strip(),
             "sent_anti_stereotype": row["sent_anti_stereotype"].strip(),
             "source":               "crows_pairs_en",

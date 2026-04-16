@@ -60,7 +60,7 @@ class TestExpander:
                 "language": lang.lower(), "origin": "native",
                 "dimension": "warmth", "target_group": tg, "target": "test",
                 "sent_stereotype": "A", "sent_anti_stereotype": "B",
-                "source": "test", "validated": False, "notes": "",
+                "source": "test", "validated": False,
             })
         return pd.DataFrame(rows)
 
@@ -105,7 +105,7 @@ def _minimal_df(**overrides) -> pd.DataFrame:
         "language": "en", "origin": "native", "dimension": "warmth",
         "target_group": "gender", "target": "woman/man",
         "sent_stereotype": "She is warm.", "sent_anti_stereotype": "He is warm.",
-        "source": "test", "validated": False, "notes": "",
+        "source": "test", "validated": False,
     }
     row.update(overrides)
     return pd.DataFrame([row])
@@ -137,7 +137,7 @@ class TestValidateCsv:
             validate(_minimal_df(sent_stereotype="Same.", sent_anti_stereotype="Same."))
 
     def test_missing_column_raises(self):
-        df = _minimal_df().drop(columns=["notes"])
+        df = _minimal_df().drop(columns=["source"])
         with pytest.raises(ValueError, match="Missing columns"):
             validate(df)
 

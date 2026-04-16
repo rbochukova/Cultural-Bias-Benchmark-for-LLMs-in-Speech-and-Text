@@ -26,7 +26,7 @@ REQUIRED_COLS     = [
     "item_id", "parallel_group_id", "language", "origin",
     "dimension", "target_group", "target",
     "sent_stereotype", "sent_anti_stereotype",
-    "source", "validated", "notes",
+    "source", "validated",
 ]
 ID_GROUP_MAP      = {"G": "gender", "N": "nationality", "P": "profession"}
 
@@ -125,7 +125,6 @@ def validate(df: pd.DataFrame, path: str = "") -> None:
 def load_validated(path: pathlib.Path = CSV_PATH) -> pd.DataFrame:
     """Load CSV, coerce types, validate schema. Returns clean DataFrame."""
     df = pd.read_csv(path, encoding="utf-8-sig")
-    df["notes"]     = df["notes"].fillna("")
     df["validated"] = df["validated"].map(
         lambda x: True if str(x).strip().lower() in ("true", "1") else False
     )

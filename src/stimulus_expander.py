@@ -28,7 +28,7 @@ OUTPUT_COLS = [
     "item_id", "parallel_group_id", "language", "origin",
     "dimension", "target_group", "target",
     "sent_stereotype", "sent_anti_stereotype",
-    "source", "validated", "notes",
+    "source", "validated",
 ]
 
 _GROUP_LETTER = {"gender": "G", "nationality": "N", "profession": "P"}
@@ -111,7 +111,7 @@ class _Expander:
         self, lang: str, origin: str, dimension: str,
         target_group: str, target: str,
         sent_stereo: str, sent_anti: str,
-        source: str, notes: str = "",
+        source: str, notes: str = "",  # notes param kept for call-site compatibility
     ) -> None:
         grp = _GROUP_LETTER[target_group]
         iid = self._next_id(lang, grp)
@@ -127,7 +127,6 @@ class _Expander:
             "sent_anti_stereotype": str(sent_anti).strip(),
             "source":               source,
             "validated":            False,
-            "notes":                notes,
         })
 
 

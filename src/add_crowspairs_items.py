@@ -1,6 +1,4 @@
 """
-add_crowspairs_items.py
-~~~~~~~~~~~~~~~~~~~~~~~
 Ingests English nationality items from the CrowS-Pairs dataset
 (Nangia et al., 2020) into stimuli_seed.csv as new EN-N source items.
 

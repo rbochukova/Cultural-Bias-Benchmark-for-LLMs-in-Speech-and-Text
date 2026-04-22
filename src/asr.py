@@ -1,26 +1,6 @@
 """
-asr.py
-~~~~~~
-Transcribes audio stimuli with Whisper and records per-item WER/CER.
-
-Processes all .wav files in data/audio/ that match the stimuli in
-stimuli_seed.csv. Transcripts are written to data/results/asr/<model>_transcripts.csv.
-
-WER and CER are computed per sentence using `jiwer`, comparing the ASR
-transcript against the original stimulus text. These per-item error rates are
-used in the attribution analysis to explain text↔speech BiasScore differences.
-
-Usage:
-    python src/asr.py                          # Whisper large-v3, all languages
-    python src/asr.py --model medium --lang fr
-    python src/asr.py --dry-run                # check file availability, no inference
-
-Output:
-    data/results/asr/<whisper_model>_transcripts.csv
-
-Columns:
-    item_id, suffix (S/A), language, whisper_model,
-    reference_text, transcript, wer, cer, transcribed_at
+Transcribes audio stimuli with Whisper and records per-item WER/CER. Processes all .wav files in data/audio/ that match the stimuli in stimuli_seed.csv. 
+WER and CER are computed per sentence using `jiwer` comparing the ASR transcript against the original stimulus text. These per-item error rates are used in the attribution analysis to explain text-speech BiasScore differences.
 """
 
 import argparse
@@ -69,7 +49,7 @@ def _transcribe(model, audio_path: pathlib.Path, lang_code: str) -> str:
 
 
 def _compute_wer(reference: str, hypothesis: str) -> tuple[float, float]:
-    """Return (WER, CER) for a reference/hypothesis pair."""
+    """Return (WER, CER) for a reference/hypothesis pair"""
     try:
         import jiwer
         wer = jiwer.wer(reference, hypothesis)
@@ -80,7 +60,7 @@ def _compute_wer(reference: str, hypothesis: str) -> tuple[float, float]:
 
 
 def _load_existing(results_path: pathlib.Path) -> set[tuple[str, str]]:
-    """Return set of (item_id, suffix) already transcribed."""
+    """Return set of (item_id, suffix) already transcribed"""
     if not results_path.exists():
         return set()
     try:
@@ -108,7 +88,6 @@ def main() -> None:
     if args.lang:
         items = items[items["language"] == args.lang]
 
-    # Build task list: one row per (item, S/A)
     tasks = []
     for _, row in items.iterrows():
         iid  = str(row["item_id"])
@@ -126,7 +105,7 @@ def main() -> None:
 
     missing = [t for t in tasks if not t["exists"]]
     if missing:
-        print(f"WARNING: {len(missing)} audio files not found — run tts.py first.")
+        print(f"WARNING: {len(missing)} audio files not found - run tts.py first.")
         if args.dry_run:
             for t in missing[:10]:
                 print(f"  missing: {t['wav'].name}")
@@ -139,12 +118,7 @@ def main() -> None:
     done         = _load_existing(results_path)
     pending      = [t for t in tasks if (t["item_id"], t["suffix"]) not in done]
 
-    print(f"Tasks total    : {len(tasks)}")
-    print(f"Already done   : {len(done)}")
-    print(f"To transcribe  : {len(pending)}")
-
     if args.dry_run:
-        print("\nDRY RUN — first 5 pending tasks:")
         for t in pending[:5]:
             print(f"  {t['wav'].name}  ref: {t['reference'][:60]}")
         return
@@ -153,7 +127,7 @@ def main() -> None:
         print("Nothing to transcribe. Done.")
         return
 
-    print(f"\nLoading Whisper {args.model} ...")
+    print(f"\nLoading Whisper {args.model}")
     model = _load_whisper(args.model)
     print("Model loaded.\n")
 

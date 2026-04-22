@@ -1,15 +1,5 @@
 """
-stimulus_expander.py
-~~~~~~~~~~~~~~~~~~~~
-Expands data/stimuli_seed.csv with additional items from:
-
-  1. CrowS-Pairs EN  -- full sets (gender, profession, nationality)
-  2. EuroGEST BG     -- 778 Masculine/Feminine gender pairs in Bulgarian
-  3. EuroGEST FR     -- 552 Masculine/Feminine gender pairs in French
-
-Existing rows are preserved as-is. New rows are appended with validated=False.
-Dimension is inferred from the English Source sentence via keyword matching;
-ambiguous items are labelled needs_review.
+Expands data/stimuli_seed.csv with additional items from: CrowS-Pairs EN, EuroGEST BG, EuroGEST FR   
 """
 
 import os
@@ -33,7 +23,6 @@ OUTPUT_COLS = [
 
 _GROUP_LETTER = {"gender": "G", "nationality": "N", "profession": "P"}
 
-# ── Dimension keyword sets ────────────────────────────────────────────────────
 _COMPETENCE_KW = frozenset([
     "lead", "leadership", "leader", "skill", "skilled", "engineer",
     "engineering", "math", "mathematics", "logic", "logical", "intelligent",
@@ -63,13 +52,8 @@ _WARMTH_KW = frozenset([
 
 def infer_dimension(source_en: str) -> tuple[str, str]:
     """
-    Returns (dimension, stereotype_gender):
-      dimension        : 'warmth' | 'competence' | 'needs_review'
-      stereotype_gender: 'masculine' | 'feminine'
-        competence -> masculine sentence is stereotypical
-        warmth     -> feminine sentence is stereotypical
+    Returns (dimension, stereotype_gender)
     """
-    # Strip punctuation before tokenising so "skilled," matches "skilled"
     tokens = set(re.sub(r"[^\w\s]", " ", source_en.lower()).split())
     c_score = len(tokens & _COMPETENCE_KW)
     w_score = len(tokens & _WARMTH_KW)
@@ -111,8 +95,7 @@ class _Expander:
         self, lang: str, origin: str, dimension: str,
         target_group: str, target: str,
         sent_stereo: str, sent_anti: str,
-        source: str, notes: str = "",  # notes param kept for call-site compatibility
-    ) -> None:
+        source: str, notes: str = "", ) -> None:
         grp = _GROUP_LETTER[target_group]
         iid = self._next_id(lang, grp)
         self.new_rows.append({

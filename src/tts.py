@@ -1,27 +1,6 @@
 """
-tts.py
-~~~~~~
 Generates audio files for all validated stimuli using Azure Cognitive Services
-Text-to-Speech (Neural voices).
-
-Azure is used because it provides high-quality neural voices for all three
-benchmark languages — including Bulgarian (bg-BG-BorislavNeural /
-bg-BG-KalinaNeural), which most other TTS providers do not support well.
-
-Voice selection: one neutral/male voice per language to minimise speaker-gender
-confounds in the ASR and LLM scoring steps. Voice can be overridden per-language
-via CLI flags.
-
-Output:
-    data/audio/<item_id>_S.wav   — stereotypical sentence
-    data/audio/<item_id>_A.wav   — anti-stereotypical sentence
-
-Resume-safe: existing .wav files are skipped.
-
-Usage:
-    AZURE_SPEECH_KEY=...  AZURE_SPEECH_REGION=... python src/tts.py
-    AZURE_SPEECH_KEY=...  AZURE_SPEECH_REGION=... python src/tts.py --lang fr
-    python src/tts.py --dry-run   # print first 5 requests without calling API
+Text-to-Speech.
 """
 
 import argparse
@@ -45,9 +24,6 @@ AUDIO_DIR.mkdir(parents=True, exist_ok=True)
 
 VALID_DIMS = {"warmth", "competence"}
 
-# Default voices: gender-neutral choices; one per language.
-# Using male voices to avoid confound with the gender of the *speaker*
-# influencing LLM stereotype judgements.
 DEFAULT_VOICES = {
     "en": "en-US-AndrewNeural",
     "fr": "fr-FR-HenriNeural",
@@ -155,27 +131,19 @@ def main() -> None:
     if args.lang:
         items = items[items["language"] == args.lang]
 
-    # Build the full list of (item_id, suffix, text, lang) to synthesise
     tasks = []
     for _, row in items.iterrows():
         lang = str(row["language"])
         tasks.append((row["item_id"], "S", str(row["sent_stereotype"]).strip(), lang))
         tasks.append((row["item_id"], "A", str(row["sent_anti_stereotype"]).strip(), lang))
 
-    # Resume: skip existing files
     pending = [
         (iid, sfx, text, lang)
         for iid, sfx, text, lang in tasks
         if not (AUDIO_DIR / f"{iid}_{sfx}.wav").exists()
     ]
 
-    print(f"Audio tasks total : {len(tasks)}  ({len(tasks)//2} items x 2 sentences)")
-    print(f"Already generated : {len(tasks) - len(pending)}")
-    print(f"To generate       : {len(pending)}")
-    print(f"Output directory  : {AUDIO_DIR.relative_to(ROOT)}")
-
     if args.dry_run:
-        print("\n=== DRY RUN — first 5 tasks ===")
         for iid, sfx, text, lang in pending[:5]:
             voice  = voices[lang]
             locale = LANG_LOCALE[lang]
@@ -206,7 +174,7 @@ def main() -> None:
             print(f"\r  {i}/{len(pending)} ({pct:.0f}%)  "
                   f"ok={succeeded}  failed={failed}", end="", flush=True)
 
-        time.sleep(0.5)  # stay within Azure free-tier rate limits
+        time.sleep(0.5) 
 
     print()
     print(f"\n{'=' * 55}")

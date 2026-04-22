@@ -1,20 +1,11 @@
 """
-stimulus_builder.py
-~~~~~~~~~~~~~~~~~~~
 Seeds the SCM warmth/competence probe set from existing benchmarks.
+Sources:
+- CrowS-Pairs EN  (gender, profession, nationality) 
+- SHADES EN + FR  (nationality)                       
+- Manual BG,FR       (all three groups)                  
 
-Sources
--------
-- CrowS-Pairs EN  (gender, profession, nationality)   → EN native items
-- SHADES EN + FR  (nationality)                        → EN + FR native items
-- Manual BG       (all three groups)                   → BG placeholder rows
-
-Output
-------
-data/stimuli_seed.csv   — full seed set, ready for human annotation
-
-Column schema
--------------
+Column schema:
 item_id            : unique key, e.g. EN-G-001  (lang-group-seq)
 parallel_group_id  : shared across languages for the same concept, e.g. G-001
 language           : en | fr | bg
@@ -28,7 +19,6 @@ sent_stereotype    : the stereotypical sentence
 sent_anti_stereotype: the anti-stereotypical sentence
 source             : dataset this was seeded from
 validated          : False until a human has reviewed and corrected it
-notes              : free-text annotation hints
 """
 
 import io
@@ -51,10 +41,9 @@ COLS = [
     "dimension",
     "target_group", "target",
     "sent_stereotype", "sent_anti_stereotype",
-    "source", "validated", "notes",
+    "source", "validated",
 ]
 
-# EN CrowS-Pairs integer → string bias_type map (verified against dataset examples)
 CP_EN_BIAS = {
     0: "race", 1: "socioeconomic", 2: "gender",
     3: "disability", 4: "nationality", 5: "sexual-orientation",
@@ -75,13 +64,13 @@ def add(
     lang: str, origin: str, dimension: str,
     target_group: str, target: str,
     sent_stereo: str, sent_anti: str,
-    source: str, notes: str = "",
+    source: str,
 ) -> None:
     grp = {"gender": "G", "nationality": "N", "profession": "P"}[target_group]
     iid = _next_id(lang, grp)
     rows.append({
         "item_id":              iid,
-        "parallel_group_id":    iid[3:],   # strip lang prefix: EN-G-001 → G-001
+        "parallel_group_id":    iid[3:], 
         "language":             lang,
         "origin":               origin,
         "dimension":            dimension,
@@ -91,49 +80,40 @@ def add(
         "sent_anti_stereotype": sent_anti.strip(),
         "source":               source,
         "validated":            False,
-        "notes":                notes,
     })
 
-
-# ── 1. CrowS-Pairs EN ────────────────────────────────────────────────────────
-print("Loading CrowS-Pairs EN …")
+print("Loading CrowS-Pairs EN ")
 try:
     from datasets import load_dataset
     cp_en = load_dataset("crows_pairs", split="test",
                          trust_remote_code=True).to_pandas()
     cp_en["bias_type_str"] = cp_en["bias_type"].map(CP_EN_BIAS)
 
-    # Gender (bias_type=2)
     for _, r in cp_en[cp_en["bias_type"] == 2].head(40).iterrows():
         add("en", "native", "needs_review",
             "gender", "woman/man",
             r["sent_more"], r["sent_less"],
-            "crows_pairs_en",
-            "Label warmth or competence; confirm target gender")
+            "crows_pairs_en")
 
-    # Socioeconomic → profession proxy (bias_type=1)
     for _, r in cp_en[cp_en["bias_type"] == 1].head(30).iterrows():
         add("en", "native", "needs_review",
             "profession", "",
             r["sent_more"], r["sent_less"],
-            "crows_pairs_en",
-            "Extract target profession from sentence; label warmth or competence")
+            "crows_pairs_en")
 
-    # Nationality (bias_type=4)
     for _, r in cp_en[cp_en["bias_type"] == 4].head(30).iterrows():
         add("en", "native", "needs_review",
             "nationality", "",
             r["sent_more"], r["sent_less"],
-            "crows_pairs_en",
-            "Extract target nationality; label warmth or competence")
+            "crows_pairs_en")
 
-    print(f"  CrowS-Pairs EN: {len(cp_en[cp_en['bias_type'].isin([1,2,4])])} source rows extracted")
+    print(f" CrowS-Pairs EN: {len(cp_en[cp_en['bias_type'].isin([1,2,4])])} source rows extracted")
 except Exception as exc:
-    print(f"  CrowS-Pairs EN failed: {exc}")
+    print(f" CrowS-Pairs EN failed: {exc}")
 
 
-# ── 2. SHADES EN + FR (nationality pairs) ───────────────────────────────────
-print("Loading SHADES …")
+
+print("Loading SHADES ")
 _SHADES_BASE = (
     "https://huggingface.co/datasets/"
     "bigscience-catalogue-data/bias-shades/raw/main"
@@ -148,28 +128,24 @@ for lang in ("en", "fr"):
         with urllib.request.urlopen(req, timeout=30) as resp:
             sh = pd.read_csv(io.BytesIO(resp.read()))
 
-        # Pair stereotype + anti-stereotype per nation entity
         paired = 0
         for nation, grp in sh.groupby("nation_entity"):
             stereos  = grp[grp["is_stereotype"] == "yes"]["sentence"].tolist()
             astereos = grp[grp["is_stereotype"] == "no"]["sentence"].tolist()
             for s, a in zip(stereos[:3], astereos[:3]):
-                # SHADES nationality items map to warmth (trust/liking dimension)
                 add(lang, "native", "warmth",
                     "nationality", nation,
                     s, a,
-                    f"shades_{lang}", "")
+                    f"shades_{lang}")
                 paired += 1
         print(f"  SHADES {lang.upper()}: {paired} pairs extracted")
     except Exception as exc:
         print(f"  SHADES {lang} failed: {exc}")
 
 
-# ── 3. FR gender + profession placeholders ──────────────────────────────────
-# CrowS-Pairs multilingual contains EN text; genuine FR items need authoring.
-print("Adding FR placeholders …")
+
+print("Adding FR placeholders")
 FR_PLACEHOLDERS = [
-    # (dimension, target_group, target, sent_stereotype, sent_anti_stereotype)
     ("warmth",     "gender",     "femme/homme",
      "TODO: warmth stereotype sentence about a woman in French",
      "TODO: warmth anti-stereotype sentence about a woman in French"),
@@ -196,12 +172,10 @@ FR_PLACEHOLDERS = [
      "TODO: competence anti-stereotype (FR)"),
 ]
 for dim, tg, target, s, a in FR_PLACEHOLDERS:
-    add("fr", "native", dim, tg, target, s, a,
-        "manual_fr", "NEEDS HUMAN AUTHORING in French")
+    add("fr", "native", dim, tg, target, s, a, "manual_fr")
 
 
-# ── 4. BG placeholders ──────────────────────────────────────────────────────
-print("Adding BG placeholders …")
+print("Adding BG placeholders ")
 BG_PLACEHOLDERS = [
     ("warmth",     "gender",      "жена/мъж",
      "TODO: топлота стереотип за жена на български",
@@ -235,11 +209,8 @@ BG_PLACEHOLDERS = [
      "TODO: топлота анти-стереотип (BG)"),
 ]
 for dim, tg, target, s, a in BG_PLACEHOLDERS:
-    add("bg", "native", dim, tg, target, s, a,
-        "manual_bg", "NEEDS HUMAN AUTHORING in Bulgarian")
+    add("bg", "native", dim, tg, target, s, a, "manual_bg")
 
-
-# ── Save ─────────────────────────────────────────────────────────────────────
 out = DATA / "stimuli_seed.csv"
 if out.exists():
     sys.exit(
@@ -257,8 +228,3 @@ print()
 print(df.groupby(["language", "target_group"])["item_id"].count()
         .rename("count").to_string())
 print()
-needs_review = (df["dimension"] == "needs_review").sum()
-needs_authoring = df["notes"].str.startswith("NEEDS").sum()
-print(f"Validated      : {df['validated'].sum()} / {len(df)}")
-print(f"Needs review   : {needs_review}  (dimension label missing)")
-print(f"Needs authoring: {needs_authoring}  (placeholder rows)")

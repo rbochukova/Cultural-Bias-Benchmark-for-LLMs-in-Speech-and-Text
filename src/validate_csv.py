@@ -1,13 +1,5 @@
 """
-validate_csv.py
-~~~~~~~~~~~~~~~
-Schema validation for data/stimuli_seed.csv.
-
-Run directly to validate:
-    python src/validate_csv.py
-
-Or import and call validate() from other scripts before writing.
-Raises ValueError with a full list of violations if any are found.
+Schema validation for data/stimuli_seed.csv
 """
 
 import pathlib
@@ -33,25 +25,20 @@ ID_GROUP_MAP      = {"G": "gender", "N": "nationality", "P": "profession"}
 
 def validate(df: pd.DataFrame, path: str = "") -> None:
     """
-    Validate df against the stimulus CSV schema.
-    Raises ValueError listing all violations found.
-    Call this before every CSV write.
+    Validate df against the stimulus CSV schema. Raises ValueError listing all violations found.
     """
     violations: list[str] = []
     label = path or "dataframe"
 
-    # ── Column presence ────────────────────────────────────────────────────────
     missing_cols = [c for c in REQUIRED_COLS if c not in df.columns]
     if missing_cols:
         violations.append(f"Missing columns: {missing_cols}")
         raise ValueError(f"Schema violations in {label}:\n" + "\n".join(violations))
-
-    # ── Uniqueness ────────────────────────────────────────────────────────────
+    
     dups = df[df.duplicated("item_id", keep=False)]["item_id"].unique()
     if len(dups):
         violations.append(f"Duplicate item_ids ({len(dups)}): {list(dups)[:10]}")
 
-    # ── Allowed values ────────────────────────────────────────────────────────
     bad_lang = df[~df["language"].isin(VALID_LANGUAGES)]["item_id"].tolist()
     if bad_lang:
         violations.append(f"Invalid language values in {len(bad_lang)} rows: {bad_lang[:5]}")
@@ -68,27 +55,27 @@ def validate(df: pd.DataFrame, path: str = "") -> None:
     if bad_group:
         violations.append(f"Invalid target_group values in {len(bad_group)} rows: {bad_group[:5]}")
 
-    # ── Boolean validated column ───────────────────────────────────────────────
+    
     df["_val_coerced"] = pd.to_numeric(df["validated"], errors="coerce")
     non_bool = df[~df["validated"].isin([True, False, 0, 1])]["item_id"].tolist()
     if non_bool:
         violations.append(f"Non-boolean validated values in {len(non_bool)} rows: {non_bool[:5]}")
     df.drop(columns=["_val_coerced"], inplace=True)
 
-    # ── Non-empty sentence fields ─────────────────────────────────────────────
+
     for col in ("sent_stereotype", "sent_anti_stereotype", "item_id", "target_group"):
         empty = df[df[col].isna() | (df[col].astype(str).str.strip() == "")]["item_id"].tolist()
         if empty:
             violations.append(f"Empty {col} in {len(empty)} rows: {empty[:5]}")
 
-    # ── Identical sentence pairs ───────────────────────────────────────────────
+
     identical = df[
         df["sent_stereotype"].str.strip() == df["sent_anti_stereotype"].str.strip()
     ]["item_id"].tolist()
     if identical:
         violations.append(f"Identical sent_stereotype/anti in {len(identical)} rows: {identical[:5]}")
 
-    # ── item_id format: XX-G-001 ───────────────────────────────────────────────
+  
     bad_format = []
     for iid in df["item_id"]:
         parts = str(iid).split("-")
@@ -102,7 +89,6 @@ def validate(df: pd.DataFrame, path: str = "") -> None:
     if bad_format:
         violations.append(f"Malformed item_ids ({len(bad_format)}): {bad_format[:5]}")
 
-    # ── target_group consistent with item_id group letter ─────────────────────
     mismatch = []
     for _, row in df.iterrows():
         parts = str(row["item_id"]).split("-")
@@ -135,7 +121,7 @@ def load_validated(path: pathlib.Path = CSV_PATH) -> pd.DataFrame:
 if __name__ == "__main__":
     try:
         df = load_validated()
-        print(f"OK — {len(df)} rows passed schema validation.")
+        print(f"OK - {len(df)} rows passed schema validation.")
     except ValueError as exc:
         print(exc, file=sys.stderr)
         sys.exit(1)

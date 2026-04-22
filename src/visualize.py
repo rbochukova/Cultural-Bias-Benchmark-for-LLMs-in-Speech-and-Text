@@ -1,27 +1,5 @@
 """
-visualize.py
-~~~~~~~~~~~~
-Generates all RQ1 figures for the thesis.
-
-Figures produced
-─────────────────
-1.  biasbars.png           — BiasScore ± 95% CI by language × dimension
-                             (Bonferroni and FDR significance markers)
-2.  parallel_scatter.png   — FR vs BG logit-diff per parallel group
-3.  origin_bars.png        — Native vs parallel BiasScore comparison
-4.  logit_dist.png         — Distribution of logit_diff by language
-5.  cue_comparison.png     — Explicit-cue vs behavioural subgroup BiasScore
-6.  target_group_analysis.png — Heatmap by target_group × lang/dim + native vs translated dot plot
-7.  variant_robustness.png         — BiasScore / logit-diff / delta across natural|grammar|typical
-8.  model_comparison.png           — Three-way: gpt-4o-mini natural | grammar | mDeBERTa PLL
-9a. speech_comparison.png          — Text vs speech BiasScore + ΔASR (RQ2)
-9b. speech_variant_robustness.png  — ΔASR across natural|grammar|typical speech variants (robustness)
-
-All figures are saved to reports/figures/ (created if absent).
-
-Usage:
-    python src/visualize.py
-    python src/visualize.py --model gpt-4o-mini --no-show
+Generates all figures for the thesis.
 """
 
 import argparse
@@ -39,15 +17,10 @@ SPEECH_DIR  = ROOT / "data" / "results" / "speech"
 FIDELITY    = ROOT / "data" / "parallel_fidelity.csv"
 FIG_DIR     = ROOT / "reports" / "figures"
 FIG_DIR.mkdir(parents=True, exist_ok=True)
-
-
-# ── colour palette ────────────────────────────────────────────────────────────
 LANG_COLORS = {"en": "#4C72B0", "fr": "#DD8452", "bg": "#55A868"}
 DIM_COLORS  = {"warmth": "#C44E52", "competence": "#4C72B0"}
 DIM_MARKERS = {"warmth": "o", "competence": "s"}
 
-
-# ── stats helpers (duplicated small subset from score.py) ─────────────────────
 
 def _cohen_h(bs: float) -> float:
     if pd.isna(bs):
@@ -92,7 +65,7 @@ def _fdr_bh(pvals: list) -> list:
     return list(reject)
 
 
-# ── Figure 1: BiasScore bars by language × dimension ─────────────────────────
+# Figure 1: BiasScore bars by language × dimension
 
 def fig_biasbars(df: pd.DataFrame, model_name: str, show: bool) -> None:
     import matplotlib.pyplot as plt
@@ -127,7 +100,6 @@ def fig_biasbars(df: pd.DataFrame, model_name: str, show: bool) -> None:
                     yerr=[[s["bs"] - s["ci_lo"]], [s["ci_hi"] - s["bs"]]],
                     fmt="none", color="black", capsize=4, linewidth=1.2, zorder=5)
 
-        # Significance markers
         y_mark = s["ci_hi"] + 0.02
         marker = ""
         if s["p"] < bon_thr:
@@ -143,12 +115,11 @@ def fig_biasbars(df: pd.DataFrame, model_name: str, show: bool) -> None:
     ax.set_xticks(x)
     ax.set_xticklabels(labels, fontsize=9)
     ax.set_ylabel("BiasScore  (proportion stereotypical choices)", fontsize=10)
-    ax.set_title(f"RQ1 — BiasScore by Language × Dimension\nModel: {model_name}",
+    ax.set_title(f"RQ1 - BiasScore by Language x Dimension\nModel: {model_name}",
                  fontsize=11, pad=10)
     ax.set_ylim(0.25, 0.80)
     ax.set_xlim(-0.5, len(cells) - 0.5)
 
-    # Legend
     patches = [
         mpatches.Patch(color=LANG_COLORS["en"], label="English"),
         mpatches.Patch(color=LANG_COLORS["fr"], label="French"),
@@ -174,14 +145,14 @@ def fig_biasbars(df: pd.DataFrame, model_name: str, show: bool) -> None:
     plt.close()
 
 
-# ── Figure 2: FR vs BG logit-diff scatter for parallel groups ─────────────────
+#Figure 2: FR vs BG logit-diff scatter for parallel groups 
 
 def fig_parallel_scatter(df: pd.DataFrame, fid_df: pd.DataFrame,
                          model_name: str, show: bool) -> None:
     """
     Scatter of continuous logit_diff per parallel group.
-    X = logit_diff in FR (positive → model preferred stereo sentence in FR)
-    Y = logit_diff in BG (positive → model preferred stereo sentence in BG)
+    X = logit_diff in FR (positive - model preferred stereo sentence in FR)
+    Y = logit_diff in BG (positive - model preferred stereo sentence in BG)
     One point per parallel group; coloured by dimension; HF pairs highlighted.
     """
     import matplotlib.pyplot as plt
@@ -229,7 +200,6 @@ def fig_parallel_scatter(df: pd.DataFrame, fid_df: pd.DataFrame,
     ax.plot([-lim, lim], [-lim, lim], "k--", linewidth=0.8, alpha=0.4,
             label="FR = BG")
 
-    # Quadrant labels
     ax.text( lim*0.85,  lim*0.85, "Both\nstereo",   ha="center", va="center",
              fontsize=7, color="#777777", style="italic")
     ax.text(-lim*0.85, -lim*0.85, "Both\nanti",      ha="center", va="center",
@@ -259,7 +229,7 @@ def fig_parallel_scatter(df: pd.DataFrame, fid_df: pd.DataFrame,
     plt.close()
 
 
-# ── Figure 3: Native vs parallel bars ────────────────────────────────────────
+# Figure 3: Native vs parallel bars 
 
 def fig_origin_bars(df: pd.DataFrame, model_name: str, show: bool) -> None:
     import matplotlib.pyplot as plt
@@ -281,7 +251,6 @@ def fig_origin_bars(df: pd.DataFrame, model_name: str, show: bool) -> None:
                              "dimension": dim, **s})
     tbl = pd.DataFrame(rows)
 
-    # Compute FDR across all cells
     tbl["sig_fdr"] = _fdr_bh(tbl["p"].tolist())
 
     langs = ["en", "fr", "bg"]
@@ -343,7 +312,7 @@ def fig_origin_bars(df: pd.DataFrame, model_name: str, show: bool) -> None:
     plt.close()
 
 
-# ── Figure 4: Logit-diff distribution ────────────────────────────────────────
+#Figure 4: Logit-diff distribution 
 
 def fig_logit_dist(df: pd.DataFrame, model_name: str, show: bool) -> None:
     import matplotlib.pyplot as plt
@@ -387,7 +356,7 @@ def fig_logit_dist(df: pd.DataFrame, model_name: str, show: bool) -> None:
     plt.close()
 
 
-# ── Figure 5: Cue-based subgroup comparison ───────────────────────────────────
+#Figure 5: Cue-based subgroup comparison 
 
 def fig_cue_comparison(df: pd.DataFrame, fid_df: pd.DataFrame,
                        model_name: str, show: bool) -> None:
@@ -475,16 +444,13 @@ def fig_cue_comparison(df: pd.DataFrame, fid_df: pd.DataFrame,
     plt.close()
 
 
-# ── Figure 6: Target-group × dimension heatmap + native vs translated ────────
+# Figure 6: Target-group × dimension heatmap + native vs translated 
 
 def fig_target_group(df: pd.DataFrame, stimuli_df: pd.DataFrame, show: bool) -> None:
     """
     Two-panel figure:
-    Left  — BiasScore heatmap: target_group (rows) × language/dimension (cols)
-             SCM-predicted primary dimension marked with a border.
-    Right — Native vs translated BiasScore divergence: dot plot per
-             language × target_group cell, showing BS_native and BS_translated
-             side by side, connected by a line coloured by direction of delta.
+    BiasScore heatmap: target_group (rows) x language/dimension (cols SCM-predicted primary dimension marked with a border.
+    Native vs translated BiasScore divergence: dot plot per language x target_group cell, showing BS_native and BS_translated side by side, connected by a line coloured by direction of delta.
     """
     import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
@@ -508,7 +474,6 @@ def fig_target_group(df: pd.DataFrame, stimuli_df: pd.DataFrame, show: bool) -> 
     )
     df["logit_diff"] = df["logit_diff"].replace([np.inf, -np.inf], np.nan)
 
-    # ── Panel 1: heatmap ──────────────────────────────────────────────────────
     tgs   = ["gender", "nationality", "profession"]
     langs = ["en", "fr", "bg"]
     dims  = ["warmth", "competence"]
@@ -546,7 +511,6 @@ def fig_target_group(df: pd.DataFrame, stimuli_df: pd.DataFrame, show: bool) -> 
     masked = np.ma.masked_invalid(heat_bs)
     im = ax.imshow(masked, cmap="RdBu_r", vmin=0.30, vmax=0.70, aspect="auto")
 
-    # Cell annotations
     for i in range(len(tgs)):
         for j in range(len(cols)):
             if np.isnan(heat_bs[i, j]):
@@ -559,7 +523,6 @@ def fig_target_group(df: pd.DataFrame, stimuli_df: pd.DataFrame, show: bool) -> 
                 ax.text(j + 0.35, i - 0.35, "*", ha="center", va="center",
                         fontsize=10, color="black", fontweight="bold")
 
-    # Thick border on SCM-primary cells
     for i, tg in enumerate(tgs):
         for j, col in enumerate(cols):
             lang, dim = col.split("/")
@@ -579,7 +542,6 @@ def fig_target_group(df: pd.DataFrame, stimuli_df: pd.DataFrame, show: bool) -> 
     plt.colorbar(im, ax=ax, fraction=0.03, pad=0.02,
                  label="BiasScore (0.5 = null)")
 
-    # ── Panel 2: native vs translated dot plot ────────────────────────────────
     ax2 = axes[1]
 
     if stimuli_df is not None:
@@ -644,19 +606,12 @@ def fig_target_group(df: pd.DataFrame, stimuli_df: pd.DataFrame, show: bool) -> 
     plt.close()
 
 
-# ── Figure 7: Prompt-variant robustness ──────────────────────────────────────
+# Figure 7: Prompt-variant robustness 
 
 def fig_variant_robustness(show: bool) -> None:
     """
     Three-panel figure comparing BiasScore across prompt variants
     (natural / grammar / typical) for each language × dimension cell.
-
-    Panel 1: BiasScore per cell per variant (grouped bars)
-    Panel 2: Mean logit-diff per cell per variant (grouped bars)
-    Panel 3: Variance heatmap (max delta in BiasScore across variants)
-
-    Cells with direction flip across variants are outlined in red.
-    The only FDR-significant cell (fr/warmth, natural) is starred.
     """
     import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
@@ -694,9 +649,9 @@ def fig_variant_robustness(show: bool) -> None:
     offsets    = np.linspace(-(n_var - 1) / 2, (n_var - 1) / 2, n_var) * width
     var_colors = {"natural": "#4C72B0", "grammar": "#DD8452", "typical": "#55A868"}
 
-    # Pre-compute stats
-    bs_table  = {}   # {variant: {cell: BiasScore}}
-    ld_table  = {}   # {variant: {cell: mean logit_diff}}
+
+    bs_table  = {}   
+    ld_table  = {}  
     for v, df in dfs.items():
         bs_table[v] = {}
         ld_table[v] = {}
@@ -706,20 +661,17 @@ def fig_variant_robustness(show: bool) -> None:
             bs_table[v][cell] = sub["chose_stereotype"].mean() if len(sub) > 0 else float("nan")
             ld_table[v][cell] = sub["logit_diff"].mean()       if len(sub) > 0 else float("nan")
 
-    # Delta: max - min BiasScore across variants
     deltas = {}
     for cell in cells:
         vals = [bs_table[v][cell] for v in variants if not pd.isna(bs_table[v][cell])]
         deltas[cell] = max(vals) - min(vals) if len(vals) >= 2 else 0.0
 
-    # Direction flip: any variant above 0.5 AND any below?
     def _has_flip(cell):
         vals = [bs_table[v][cell] for v in variants if not pd.isna(bs_table[v][cell])]
         return any(v > 0.5 for v in vals) and any(v < 0.5 for v in vals)
 
     fig, axes = plt.subplots(1, 3, figsize=(16, 5))
 
-    # ── Panel 1: BiasScore ────────────────────────────────────────────────────
     ax = axes[0]
     for k, v in enumerate(variants):
         scores = [bs_table[v][c] for c in cells]
@@ -728,13 +680,11 @@ def fig_variant_robustness(show: bool) -> None:
                linewidth=0.5, label=v)
 
     ax.axhline(0.5, color="black", linestyle="--", linewidth=1.0)
-    # Outline cells with direction flip
     for j, cell in enumerate(cells):
         if _has_flip(cell):
             ax.axvspan(j - 0.45, j + 0.45, color="none",
                        edgecolor="#cc2200", linewidth=1.5, zorder=5,
                        fill=False)
-    # Star the fr/warmth natural bar (the one significant result)
     fw_idx = cells.index("fr/warmth")
     fw_bs  = bs_table["natural"].get("fr/warmth", float("nan"))
     if not pd.isna(fw_bs):
@@ -747,8 +697,6 @@ def fig_variant_robustness(show: bool) -> None:
     ax.set_ylim(0.30, 0.70)
     ax.set_title("BiasScore by Variant", fontsize=10)
     ax.legend(fontsize=8)
-
-    # ── Panel 2: Mean logit-diff ──────────────────────────────────────────────
     ax = axes[1]
     for k, v in enumerate(variants):
         lds = [ld_table[v][c] for c in cells]
@@ -767,9 +715,8 @@ def fig_variant_robustness(show: bool) -> None:
     ax.set_ylabel("Mean logit-diff  (stereo − anti)", fontsize=10)
     ax.set_title("Mean Logit-Diff by Variant", fontsize=10)
     ax.legend(fontsize=8)
-
-    # ── Panel 3: Delta heatmap ────────────────────────────────────────────────
     ax = axes[2]
+
     delta_vals = np.array([deltas[c] for c in cells]).reshape(1, -1)
     im = ax.imshow(delta_vals, aspect="auto", cmap="YlOrRd",
                    vmin=0, vmax=0.20)
@@ -783,7 +730,7 @@ def fig_variant_robustness(show: bool) -> None:
     plt.colorbar(im, ax=ax, fraction=0.05, pad=0.04)
 
     fig.suptitle(
-        "RQ1 — Prompt-Variant Robustness (gpt-4o-mini)\n"
+        "RQ1 - Prompt-Variant Robustness (gpt-4o-mini)\n"
         "Red outline = direction flip across variants  |  * = FDR-significant cell",
         fontsize=11, y=1.02
     )
@@ -796,16 +743,12 @@ def fig_variant_robustness(show: bool) -> None:
     plt.close()
 
 
-# ── Figure 7: Three-way model/prompt comparison ───────────────────────────────
+# Figure 7: Three-way model/prompt comparison 
 
 def fig_model_comparison(show: bool) -> None:
     """
-    Side-by-side BiasScore for each language × dimension cell across three
-    conditions:
-      - gpt-4o-mini, natural prompt  (primary)
-      - gpt-4o-mini, grammar prompt  (prompt stability)
-      - mDeBERTa-v3, PLL scoring     (second model)
-    Highlights unstable cells (max_delta > 0.10) with a shaded background.
+    Side-by-side BiasScore for each language x dimension cell across three
+    conditions
     """
     import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
@@ -837,7 +780,6 @@ def fig_model_comparison(show: bool) -> None:
 
     fig, ax = plt.subplots(figsize=(13, 5))
 
-    # Compute BiasScores per cell per condition
     cell_scores = {}
     for label, df in dfs.items():
         scores = {}
@@ -847,7 +789,6 @@ def fig_model_comparison(show: bool) -> None:
             scores[cell] = sub["chose_stereotype"].mean() if len(sub) > 0 else float("nan")
         cell_scores[label] = scores
 
-    # Shade unstable cells (max delta across conditions > 0.10)
     for j, cell in enumerate(cells):
         vals = [cell_scores[lbl][cell] for lbl in labels
                 if not pd.isna(cell_scores[lbl][cell])]
@@ -868,7 +809,7 @@ def fig_model_comparison(show: bool) -> None:
     ax.set_ylabel("BiasScore", fontsize=10)
     ax.set_ylim(0.25, 0.80)
     ax.set_title(
-        "RQ1 — Three-Way Model/Prompt Comparison\n"
+        "RQ1 - Three-Way Model/Prompt Comparison\n"
         "Red shading = unstable cell (max delta > 0.10 across conditions)",
         fontsize=11
     )
@@ -891,18 +832,18 @@ def fig_model_comparison(show: bool) -> None:
     plt.close()
 
 
-# ── Figure 9a: Speech variant robustness — ΔASR across prompt phrasings ──────
+# Figure 9a: Speech variant robustness — ΔASR across prompt phrasings 
 
 def fig_speech_variant_robustness(
     text_df: pd.DataFrame,
-    speech_dfs: dict,        # {"natural": df, "grammar": df, "typical": df}
+    speech_dfs: dict,     
     asr_model: str,
     model_name: str,
     show: bool,
 ) -> None:
     """
-    Grouped-bar chart: ΔASR = BiasScore(speech) − BiasScore(text) per
-    language × dimension cell, one bar per speech prompt variant
+    Grouped-bar chart: ΔASR = BiasScore(speech) - BiasScore(text) per
+    language x dimension cell, one bar per speech prompt variant
     (natural / grammar / typical).
 
     Checks robustness of the modality gap across prompt phrasings.
@@ -926,7 +867,6 @@ def fig_speech_variant_robustness(
     width  = 0.22
     offsets = np.linspace(-(n_var - 1) / 2, (n_var - 1) / 2, n_var) * width
 
-    # Pre-compute ΔASR per cell per variant
     gaps: dict[str, list] = {v: [] for v in variants}
     for vname, sp_df in speech_dfs.items():
         merged = text_df[["item_id", "language", "dimension", "chose_stereotype"]].merge(
@@ -967,7 +907,6 @@ def fig_speech_variant_robustness(
     ] + [plt.Line2D([0], [0], color="black", linestyle="-", label="no gap (0)")]
     ax.legend(handles=legend_handles, fontsize=8.5, loc="upper right", framealpha=0.9)
 
-    # Annotate max spread per cell
     for i, (lang, dim) in enumerate(cells):
         vals = [gaps[v][i] for v in variants if not pd.isna(gaps[v][i])]
         if len(vals) >= 2:
@@ -986,19 +925,15 @@ def fig_speech_variant_robustness(
     plt.close()
 
 
-# ── Figure 9b: Speech comparison — text vs speech BiasScore + ΔASR ───────────
+# Figure 9b: Speech comparison - text vs speech BiasScore + ΔASR 
 
 def fig_speech_comparison(text_df: pd.DataFrame, speech_df: pd.DataFrame,
                            asr_model: str, model_name: str, show: bool) -> None:
     """
-    Two-panel RQ2 figure.
-
-    Panel A: Grouped bar chart — BiasScore(text, solid) vs BiasScore(speech, hatched)
-             per language × dimension cell, with 95% bootstrap CI error bars.
-
-    Panel B: ΔASR = BiasScore(speech) − BiasScore(text) per cell, with 95%
+    Two-panel RQ2 figure. Grouped bar chart - BiasScore(text, solid) vs BiasScore(speech, hatched) per language x dimension cell, with 95% bootstrap CI error bars.
+    ΔASR = BiasScore(speech) - BiasScore(text) per cell, with 95%
              bootstrap CI.  Cells significant under McNemar's test (BH-FDR
-             corrected) are marked with a dagger †.
+             corrected) are marked with a dagger
     """
     import matplotlib.pyplot as plt
     import matplotlib.patches as mpatches
@@ -1037,7 +972,6 @@ def fig_speech_comparison(text_df: pd.DataFrame, speech_df: pd.DataFrame,
         chi2_stat = (abs(b - c) - 1) ** 2 / (b + c)
         return float(1 - chi2_dist.cdf(chi2_stat, df=1))
 
-    # Collect per-cell statistics
     text_stats, speech_stats, gaps, gap_cis, mc_pvals = [], [], [], [], []
     for lang, dim in cells:
         grp = merged[(merged["language"] == lang) & (merged["dimension"] == dim)]
@@ -1055,16 +989,14 @@ def fig_speech_comparison(text_df: pd.DataFrame, speech_df: pd.DataFrame,
     x     = np.arange(len(cells))
     width = 0.35
 
-    # ── Panel A: BiasScore text vs speech ────────────────────────────────────
+    # Panel A: BiasScore text vs speech 
     for i, (ts, ss, (lang, dim)) in enumerate(zip(text_stats, speech_stats, cells)):
         color = LANG_COLORS.get(lang, "#888888")
-        # Text — solid
         ax1.bar(x[i] - width / 2, ts["bs"], width,
                 color=color, alpha=0.85, edgecolor="white", linewidth=0.8)
         ax1.errorbar(x[i] - width / 2, ts["bs"],
                      yerr=[[ts["bs"] - ts["ci_lo"]], [ts["ci_hi"] - ts["bs"]]],
                      fmt="none", color="black", capsize=3, linewidth=1.0, zorder=5)
-        # Speech — hatched
         ax1.bar(x[i] + width / 2, ss["bs"], width,
                 color=color, alpha=0.40, edgecolor=color, linewidth=0.8, hatch="///")
         ax1.errorbar(x[i] + width / 2, ss["bs"],
@@ -1088,7 +1020,6 @@ def fig_speech_comparison(text_df: pd.DataFrame, speech_df: pd.DataFrame,
          for l in ["en", "fr", "bg"]]
     ax1.legend(handles=legend_patches, fontsize=7.5, loc="upper right", framealpha=0.9)
 
-    # ── Panel B: ΔASR bars ────────────────────────────────────────────────────
     for i, (gap, (ci_lo, ci_hi), (lang, dim)) in enumerate(zip(gaps, gap_cis, cells)):
         color = LANG_COLORS.get(lang, "#888888")
         alpha = 0.85 if dim == "competence" else 0.50
@@ -1131,8 +1062,6 @@ def fig_speech_comparison(text_df: pd.DataFrame, speech_df: pd.DataFrame,
     plt.close()
 
 
-# ── Main ─────────────────────────────────────────────────────────────────────
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate RQ1 figures")
     parser.add_argument("--model",    default="gpt-4o-mini")
@@ -1142,7 +1071,7 @@ def main() -> None:
 
     try:
         import matplotlib
-        matplotlib.use("Agg")   # non-interactive backend (works without a display)
+        matplotlib.use("Agg")  
         import matplotlib.pyplot as plt
     except ImportError:
         sys.exit("ERROR: matplotlib not installed. Run: pip install matplotlib")
@@ -1176,14 +1105,12 @@ def main() -> None:
     fig_variant_robustness(show)
     fig_model_comparison(show)
 
-    # RQ2 speech figures (skipped if speech results not available)
     safe_model   = args.model.replace("/", "-")
     speech_path  = SPEECH_DIR / f"large-v3_{safe_model}_results.csv"
     if speech_path.exists():
         speech_df = pd.read_csv(speech_path, encoding="utf-8")
         fig_speech_comparison(df, speech_df, "large-v3", args.model, show)
 
-        # Speech variant robustness figure — load grammar/typical if present
         speech_dfs: dict = {"natural": speech_df}
         for vname in ("grammar", "typical"):
             vpath = SPEECH_DIR / f"large-v3_{safe_model}_{vname}_results.csv"

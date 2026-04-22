@@ -1,29 +1,7 @@
 """
-inference_mdeberta.py
-~~~~~~~~~~~~~~~~~~~~~
 Text-condition forced-choice bias inference using mDeBERTa-v3-base.
 
-Scoring method: Pseudo-Log-Likelihood (PLL)
-  For each sentence, we compute PLL = sum_i log P(token_i | all other tokens).
-  This is done by masking each token in turn and reading the masked-LM head's
-  output probability for the original token at that position.
-  The sentence with the higher PLL is judged 'more natural' by the model.
-
-Reference: Salazar et al. (2020) "Masked Language Model Scoring"
-  https://aclanthology.org/2020.acl-main.240
-
-Model: microsoft/mdeberta-v3-base
-  Multilingual DeBERTa v3, covers English, French, and Bulgarian.
-  Downloaded automatically from HuggingFace on first run (~900 MB).
-
-Output:
-    data/results/text/mdeberta-v3-base_results.csv
-
-Usage:
-    python src/inference_mdeberta.py
-    python src/inference_mdeberta.py --lang fr
-    python src/inference_mdeberta.py --batch-size 8 --device cpu
-    python src/inference_mdeberta.py --dry-run
+Scoring method - Pseudo-Log-Likelihood (PLL): For each sentence, we compute PLL = sum_i log P(token_i | all other tokens). This is done by masking each token in turn and reading the masked-LM head's output probability for the original token at that position. The sentence with the higher PLL is judged 'more natural' by the model.
 """
 
 import argparse
@@ -54,8 +32,7 @@ def _load_model(device: str):
     """Load mDeBERTa-v3 tokenizer and model."""
     try:
         import torch
-        # Import DeBERTa classes directly to avoid the AutoModel factory,
-        # which pulls in torchvision and triggers the nms operator conflict.
+        # Import DeBERTa classes directly to avoid the AutoModel factory
         from transformers import DebertaV2Tokenizer, DebertaV2ForMaskedLM
     except ImportError:
         sys.exit(
@@ -78,7 +55,7 @@ def _load_model(device: str):
 
 def _pll(text: str, tokenizer, model, device: str) -> float:
     """
-    Compute the Pseudo-Log-Likelihood for `text` under a masked LM.
+    Compute the Pseudo-Log-Likelihood for text under a masked LM.
     Returns the mean per-token log probability (sum / n_tokens).
     Returns -inf on error.
     """
@@ -86,10 +63,9 @@ def _pll(text: str, tokenizer, model, device: str) -> float:
     import torch.nn.functional as F
 
     inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
-    input_ids = inputs["input_ids"].to(device)        # (1, seq_len)
+    input_ids = inputs["input_ids"].to(device)      
     n_tokens  = input_ids.shape[1]
 
-    # Skip [CLS], [SEP] — only mask positions 1 .. n_tokens-2
     token_positions = list(range(1, n_tokens - 1))
     if not token_positions:
         return float("-inf")
@@ -103,12 +79,12 @@ def _pll(text: str, tokenizer, model, device: str) -> float:
                 input_ids=masked_ids,
                 attention_mask=inputs["attention_mask"].to(device),
             )
-            logits_pos = outputs.logits[0, pos]            # (vocab_size,)
+            logits_pos = outputs.logits[0, pos]            
             log_probs  = F.log_softmax(logits_pos, dim=-1)
             orig_token = input_ids[0, pos].item()
             total_log_prob += log_probs[orig_token].item()
 
-    return total_log_prob / len(token_positions)   # mean per-token PLL
+    return total_log_prob / len(token_positions)  
 
 
 def _score_item(
@@ -129,7 +105,7 @@ def _score_item(
         if pll_stereo == float("-inf") and pll_anti == float("-inf"):
             return None
 
-        # Map to A/B framework to keep output schema consistent with OpenAI results
+        # Map to A/B framework to keep output schema consistent 
         pll_A = pll_stereo if stereo_is_A else pll_anti
         pll_B = pll_anti   if stereo_is_A else pll_stereo
 
@@ -144,12 +120,12 @@ def _score_item(
             "target":            meta["target"],
             "origin":            meta["origin"],
             "parallel_group_id": meta["parallel_group_id"],
-            "model":             MODEL_NAME.split("/")[-1],   # "mdeberta-v3-base"
+            "model":             MODEL_NAME.split("/")[-1], 
             "prompt_variant":    "pll",
             "modality":          "text",
             "asr_system":        None,
             "A_is_stereotype":   stereo_is_A,
-            "logprob_A":         round(pll_A, 6),   # PLL used in place of logprob
+            "logprob_A":         round(pll_A, 6),  
             "logprob_B":         round(pll_B, 6),
             "chose_A":           chose_A,
             "chose_stereotype":  chose_stereo,
@@ -194,7 +170,6 @@ def main() -> None:
                         help="Print PLL for first 3 items and exit")
     args = parser.parse_args()
 
-    # Load stimuli
     df = pd.read_csv(CSV_PATH, encoding="utf-8")
     items = df[
         df["validated"].map(lambda x: str(x).strip().lower() in ("true", "1"))
@@ -213,14 +188,9 @@ def main() -> None:
     done         = _load_existing(results_path)
     to_score     = items[~items["item_id"].isin(done)]
 
-    print(f"Stimuli   : {len(items)}  (lang={args.lang or 'all'})")
-    print(f"Already   : {len(done)}")
-    print(f"To score  : {len(to_score)}")
-
     tokenizer, model, device = _load_model(args.device)
 
     if args.dry_run:
-        print(f"\n=== DRY RUN — first 3 items (PLL scoring) ===")
         for _, row in to_score.head(3).iterrows():
             s_text = str(row["sent_stereotype"]).strip()
             a_text = str(row["sent_anti_stereotype"]).strip()
@@ -280,7 +250,7 @@ def main() -> None:
         rdf        = pd.read_csv(results_path, encoding="utf-8")
         bias_score = rdf["chose_stereotype"].mean()
         print(f"\nOverall BiasScore (mDeBERTa PLL): {bias_score:.3f}")
-        print("\nBiasScore by language × dimension:")
+        print("\nBiasScore by language x dimension:")
         print(
             rdf.groupby(["language", "dimension"])["chose_stereotype"]
             .agg(["mean", "count"])

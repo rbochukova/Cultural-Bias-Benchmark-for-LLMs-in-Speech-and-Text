@@ -8,15 +8,12 @@ import pathlib
 import pandas as pd
 import pytest
 
-# Make src importable
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
 from stimulus_expander import infer_dimension, _Expander
 from validate_csv import validate, VALID_DIMENSIONS, VALID_GROUPS, VALID_LANGUAGES
 
-
-# ── infer_dimension ───────────────────────────────────────────────────────────
 
 class TestInferDimension:
     def test_competence_keyword(self):
@@ -34,7 +31,6 @@ class TestInferDimension:
         assert dim == "needs_review"
 
     def test_punctuation_stripped(self):
-        # "skilled," should match "skilled" after punctuation stripping
         dim, _ = infer_dimension("She is skilled, efficient, and smart.")
         assert dim == "competence"
 
@@ -46,8 +42,6 @@ class TestInferDimension:
         dim, _ = infer_dimension("HE IS A LEADER AND A MANAGER.")
         assert dim == "competence"
 
-
-# ── _Expander ─────────────────────────────────────────────────────────────────
 
 class TestExpander:
     def _make_existing(self, item_ids: list[str]) -> pd.DataFrame:
@@ -85,7 +79,6 @@ class TestExpander:
     def test_malformed_id_skipped_gracefully(self):
         existing = self._make_existing(["EN-G-005"])
         existing.loc[0, "item_id"] = "BADFORMAT"
-        # Should not crash
         exp = _Expander(existing)
         exp.add("en", "native", "warmth", "gender", "woman/man", "S", "A", "test")
         assert exp.new_rows[0]["item_id"] == "EN-G-001"
@@ -96,8 +89,6 @@ class TestExpander:
         exp.add("en", "native", "warmth", "gender", "woman/man", "S", "A", "test")
         assert exp.new_rows[0]["validated"] is False
 
-
-# ── validate_csv ──────────────────────────────────────────────────────────────
 
 def _minimal_df(**overrides) -> pd.DataFrame:
     row = {
@@ -113,7 +104,7 @@ def _minimal_df(**overrides) -> pd.DataFrame:
 
 class TestValidateCsv:
     def test_valid_row_passes(self):
-        validate(_minimal_df())  # should not raise
+        validate(_minimal_df())  
 
     def test_duplicate_item_id_raises(self):
         df = pd.concat([_minimal_df(), _minimal_df()], ignore_index=True)
@@ -146,7 +137,6 @@ class TestValidateCsv:
             validate(_minimal_df(item_id="BADFORMAT"))
 
     def test_group_letter_mismatch_raises(self):
-        # EN-N-001 but target_group=gender -- inconsistent
         with pytest.raises(ValueError, match="target_group/item_id letter mismatch"):
             validate(_minimal_df(item_id="EN-N-001", parallel_group_id="N-001"))
 
@@ -158,9 +148,6 @@ class TestValidateCsv:
         for lang in VALID_LANGUAGES:
             iid = f"{lang.upper()}-G-001"
             validate(_minimal_df(language=lang, item_id=iid, parallel_group_id="G-001"))
-
-
-# ── Structural data-integrity tests ──────────────────────────────────────────
 
 STIMULI_PATH    = ROOT / "data" / "stimuli_seed.csv"
 TEXT_RESULTS    = ROOT / "data" / "results" / "text" / "gpt-4o-mini_results.csv"
@@ -223,8 +210,6 @@ class TestStimuliStructure:
         assert not invalid, f"Unexpected dimensions in stimuli: {invalid}"
 
     def test_no_identical_sentence_pairs_in_validated(self, stimuli_df):
-        # Only validated items must have distinct sentence pairs;
-        # known-invalid items (FR-G-020, FR-G-091, FR-G-119) are allowed to be identical.
         validated = stimuli_df[stimuli_df["validated"] == True]
         same = validated["sent_stereotype"] == validated["sent_anti_stereotype"]
         assert not same.any(), (
@@ -250,9 +235,6 @@ class TestTextResultsStructure:
         assert vals <= {0, 1, True, False}, f"Non-binary chose_stereotype values: {vals}"
 
     def test_all_item_ids_in_stimuli(self, text_results_df, stimuli_df):
-        # Allow a small number of orphaned items (artifacts from removed stimuli,
-        # e.g. the 33 SHADES nationality items removed after initial inference runs).
-        # Threshold: < 1% of result rows may be orphaned.
         result_ids  = set(text_results_df["item_id"].astype(str))
         stimuli_ids = set(stimuli_df["item_id"].astype(str))
         orphans = result_ids - stimuli_ids
@@ -281,8 +263,6 @@ class TestSpeechResultsStructure:
         )
 
     def test_wer_values_non_negative(self, speech_results_df):
-        # WER can exceed 1 when insertions outnumber reference words (jiwer behaviour).
-        # Only sanity-check that values are non-negative and below a loose ceiling.
         for col in ("wer_S", "wer_A"):
             vals = speech_results_df[col].dropna()
             assert (vals >= 0).all(), f"{col} has negative WER values"

@@ -1,31 +1,9 @@
 """
-fidelity_check.py
-~~~~~~~~~~~~~~~~~
-Two-stage fidelity check for parallel FR<->BG item pairs (thesis §3.3).
+Two-stage fidelity check for parallel FR-BG item pairs.
 
-Stage 1 — Cue-preservation check
-  Classifies whether each sentence contains warmth or competence-relevant
-  content, using expanded language-specific cue word lists. A pair passes
-  if at least one cue is found in both the FR and BG versions.
+Stage 1: Classifies whether each sentence contains warmth or competence-relevant content, using expanded language-specific cue word lists. A pair passes if at least one cue is found in both the FR and BG versions.
 
-Stage 2 — Back-translation semantic similarity
-  Each sentence is translated back to English via GPT-4o-mini, then
-  cosine similarity is computed between source and back-translated embeddings
-  using OpenAI text-embedding-3-small.
-  Items below --threshold (default 0.70) are flagged.
-
-High-fidelity definition:
-  dim_agree AND direction_agree
-  (annotation-consistency criterion; cue-preservation and back-translation similarity
-   are reported as supplementary diagnostics but do not gate the subset)
-
-Output:
-  data/parallel_fidelity.csv
-
-Usage:
-  OPENAI_API_KEY=... python src/fidelity_check.py
-  OPENAI_API_KEY=... python src/fidelity_check.py --cue-only   # skip back-translation
-  OPENAI_API_KEY=... python src/fidelity_check.py --threshold 0.65
+Stage 2: Each sentence is translated back to English via GPT-4o-mini, then cosine similarity is computed between source and back-translated embeddings using OpenAI text-embedding-3-small. Items below threshold, default 0.70, are flagged.
 """
 
 import argparse
@@ -47,10 +25,7 @@ ROOT     = pathlib.Path(__file__).resolve().parent.parent
 CSV_PATH = ROOT / "data" / "stimuli_seed.csv"
 OUT_PATH = ROOT / "data" / "parallel_fidelity.csv"
 
-# ── Expanded SCM cue word lists ───────────────────────────────────────────────
-# French — warmth cues
 WARMTH_FR = {
-    # Explicit trait adjectives
     'chaleureux','chaleureuse','gentil','gentille','aimable','sympa',
     'sympathique','affectueux','affectueuse','sensible','doux','douce',
     'tendre','bienveillant','bienveillante','attentionné','attentionnée',
@@ -61,7 +36,6 @@ WARMTH_FR = {
     'reposé','reposée','blessé','blessée','arrivé','arrivée',
     'ignoré','ignorée','soucié','souciée','perçu','perçue',
     'bavard','bavarde','communicatif','communicative',
-    # Behavioral / contextual warmth
     'famille','familiaux','amis','ami','amie','relationnels','relationnel',
     'aider','aidé','aidée','aide','soutien','soutenu','soutenue',
     'solidaire','coopératif','coopérative','chaleur','empathie',
@@ -69,10 +43,7 @@ WARMTH_FR = {
     'volunteering','volontaire','bénévole','sauver','sacrifice',
     'pleurer','pleurée','pleuré','larmes','romantique','romantiques',
 }
-
-# French — competence cues
 COMPETENCE_FR = {
-    # Explicit trait adjectives
     'fort','forte','compétent','compétente','intelligent','intelligente',
     'capable','efficace','logique','rationnel','rationnelle','indépendant',
     'indépendante','ambitieux','ambitieuse','confiant','confiante',
@@ -82,7 +53,6 @@ COMPETENCE_FR = {
     'strict','stricte','doué','douée','solide','sûr','sûre',
     'vivant','vivante','bon','bonne','professionnel','professionnelle',
     'assertif','assertive','décisif','décisive','analytique',
-    # Competence behavioral/contextual
     'leadership','leader','diriger','dirigeant','gérer','gestion',
     'réussir','réussi','réussie','succès','performance','compétition',
     'carrière','travail','emploi','professionnel','technique','science',
@@ -92,9 +62,7 @@ COMPETENCE_FR = {
     'protéger','protégé','protégée','défendre','défendu','sécurité',
 }
 
-# Bulgarian — warmth cues
 WARMTH_BG = {
-    # Explicit trait adjectives (masc and fem forms)
     'страстен','страстна','топъл','топла','мил','мила','добър','добра',
     'нежен','нежна','грижлив','грижлива','грижовен','грижовна',
     'емоционален','емоционална','чувствителен','чувствителна',
@@ -102,8 +70,7 @@ WARMTH_BG = {
     'внимателен','внимателна','любящ','любяща','добросърдечен','добросърдечна',
     'сърдечен','сърдечна','комуникативен','комуникативна',
     'искрен','искрена','честен','честна','морален','морална',
-    'готов','готова',  # "готов/а да помогна" = ready to help
-    # Behavioral / contextual warmth
+    'готов','готова', 
     'семейство','семейства','приятели','приятел','приятелки','приятелка',
     'помогна','помага','помощ','подкрепя','подкрепен','подкрепена',
     'грижа','грижи','грижи се','плача','плакал','плакала','сълзи',
@@ -111,18 +78,15 @@ WARMTH_BG = {
     'доброволец','жертва','спасявам','спасен','спасена',
 }
 
-# Bulgarian — competence cues
 COMPETENCE_BG = {
-    # Explicit trait adjectives (masc and fem forms)
     'строг','строга','силен','силна','умен','умна','компетентен','компетентна',
     'способен','способна','ефективен','ефективна','логичен','логична',
     'независим','независима','амбициозен','амбициозна','уверен','уверена',
     'смел','смела','решителен','решителна','настоятелен','настоятелна',
     'по-добър','по-добра','успешен','успешна','надарен','надарена',
     'уморен','уморена','победен','победена','физически','физическа',
-    'добър','добра',  # "добър в нещо" = good at something (competence context)
-    'готов','готова',  # "готов да работя" = ready to work (competence)
-    # Behavioral / contextual competence
+    'добър','добра',
+    'готов','готова', 
     'ръководен','ръководна','ръководител','лидер','управлявам','управление',
     'успех','постижение','работа','кариера','професионален','професионална',
     'физически','спорт','атлетичен','атлетична','победа','шампион',
@@ -139,7 +103,7 @@ CUES = {
 
 def _cue_present(text: str, lang: str, dim: str) -> bool:
     tokens = set(text.lower().split())
-    # Also check substrings for compound words
+
     text_lower = text.lower()
     cues = CUES.get(lang, {}).get(dim, set())
     return bool(tokens & cues) or any(c in text_lower for c in cues if len(c) > 5)
@@ -166,7 +130,7 @@ def _backtranslate_batch(client: OpenAI, texts: list[str], src_lang: str) -> lis
                     messages=[{'role': 'user', 'content': prompt}],
                 )
                 lines = resp.choices[0].message.content.strip().split('\n')
-                # Extract just the translation text (strip numbering)
+              
                 translations = []
                 for line in lines:
                     line = line.strip()
@@ -176,7 +140,7 @@ def _backtranslate_batch(client: OpenAI, texts: list[str], src_lang: str) -> lis
                         translations.append(parts[1].strip() if len(parts) > 1 else line)
                     elif line:
                         translations.append(line)
-                # Pad if needed
+                
                 while len(translations) < len(batch):
                     translations.append('')
                 results.extend(translations[:len(batch)])
@@ -185,14 +149,13 @@ def _backtranslate_batch(client: OpenAI, texts: list[str], src_lang: str) -> lis
                 if attempt == 2:
                     results.extend([''] * len(batch))
                 time.sleep(2)
-        print(f'  Translated {min(i+batch_size, len(texts))}/{len(texts)}',
-              end='\r', flush=True)
+
     print()
     return results
 
 
 def _get_embeddings(client: OpenAI, texts: list[str]) -> np.ndarray:
-    """Get text-embedding-3-small embeddings for a list of texts."""
+    """Get text-embedding-3-small embeddings for a list of texts"""
     vectors = []
     batch_size = 100
     for i in range(0, len(texts), batch_size):
@@ -259,8 +222,7 @@ def main() -> None:
 
     fid_df = pd.DataFrame(rows)
 
-    # ── Stage 1 summary ───────────────────────────────────────────────────────
-    print(f"\nStage 1 — Cue-preservation check")
+    print(f"\nStage 1 - Cue-preservation check")
     print(f"  FR cue present : {fid_df['cue_preserved_fr'].sum()} / {len(fid_df)}")
     print(f"  BG cue present : {fid_df['cue_preserved_bg'].sum()} / {len(fid_df)}")
     print(f"  Both present   : {(fid_df['cue_preserved_fr'] & fid_df['cue_preserved_bg']).sum()} / {len(fid_df)}")
@@ -276,18 +238,17 @@ def main() -> None:
         _save(fid_df, args)
         return
 
-    # ── Stage 2: back-translation + embedding similarity ─────────────────────
-    print(f"\nStage 2 — Back-translation + embedding similarity")
+    print(f"\nStage 2 - Back-translation + embedding similarity")
 
-    print("  Back-translating FR sentences...")
+    print("  Back-translating FR sentences")
     bt_fr = _backtranslate_batch(client, fid_df['fr_stereo'].tolist(), 'fr')
-    print("  Back-translating BG sentences...")
+    print("  Back-translating BG sentences")
     bt_bg = _backtranslate_batch(client, fid_df['bg_stereo'].tolist(), 'bg')
 
     fid_df['bt_fr'] = bt_fr
     fid_df['bt_bg'] = bt_bg
 
-    print("  Embedding original + back-translated sentences...")
+    print("  Embedding original + back-translated sentences")
     all_texts = (
         fid_df['fr_stereo'].tolist() +
         fid_df['bg_stereo'].tolist() +
@@ -341,7 +302,6 @@ def _save(fid_df: pd.DataFrame, args) -> None:
     print(f"  competence : {c}")
     print(f"Saved: {OUT_PATH.name}")
 
-    # ── Methods table ────────────────────────────────────────────────────────────
     print(f"\n{'='*55}")
     print("PARALLEL FIDELITY METHODS TABLE")
     print(f"{'='*55}")
@@ -353,13 +313,13 @@ def _save(fid_df: pd.DataFrame, args) -> None:
     both_ok = (fid_df['dim_agree'] & fid_df['direction_agree']).sum()
     print(f"{'  Dimension agreement (FR = BG)':<45} {dim_ok:>5} {100*dim_ok/n:>5.0f}%")
     print(f"{'  Stereotype direction agreement (FR = BG)':<45} {dir_ok:>5} {100*dir_ok/n:>5.0f}%")
-    print(f"{'  Both agree → high-fidelity subset':<45} {both_ok:>5} {100*both_ok/n:>5.0f}%")
+    print(f"{'  Both agree -> high-fidelity subset':<45} {both_ok:>5} {100*both_ok/n:>5.0f}%")
     if 'cue_preserved_fr' in fid_df.columns:
         cue_fr = fid_df['cue_preserved_fr'].sum()
         cue_bg = fid_df['cue_preserved_bg'].sum()
         cue_both = (fid_df['cue_preserved_fr'] & fid_df['cue_preserved_bg']).sum()
-        print(f"{'  SCM cue present — FR':<45} {cue_fr:>5} {100*cue_fr/n:>5.0f}%  (diagnostic)")
-        print(f"{'  SCM cue present — BG':<45} {cue_bg:>5} {100*cue_bg/n:>5.0f}%  (diagnostic)")
+        print(f"{'  SCM cue present - FR':<45} {cue_fr:>5} {100*cue_fr/n:>5.0f}%  (diagnostic)")
+        print(f"{'  SCM cue present - BG':<45} {cue_bg:>5} {100*cue_bg/n:>5.0f}%  (diagnostic)")
         print(f"{'  Cue present in both':<45} {cue_both:>5} {100*cue_both/n:>5.0f}%  (diagnostic)")
     if 'sim_cross' in fid_df.columns and not fid_df['sim_cross'].isna().all():
         sim_mean = fid_df['sim_cross'].mean()
@@ -369,7 +329,6 @@ def _save(fid_df: pd.DataFrame, args) -> None:
         print(f"  Cross-lang sim: mean={sim_mean:.3f}  min={sim_min:.3f}")
     print("-" * 57)
     print(f"  High-fidelity criterion: dim_agree AND direction_agree")
-    print(f"  (Cue-preservation and semantic similarity are supplementary diagnostics)")
     print()
     print("Excluded pairs (dim or direction mismatch):")
     low = fid_df[~fid_df['high_fidelity']]

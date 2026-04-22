@@ -25,7 +25,7 @@ CROWSPAIRS_URL = (
 
 
 def _fetch_crowspairs() -> pd.DataFrame:
-    print("Fetching CrowS-Pairs from GitHub ...", flush=True)
+    print("Fetching CrowS-Pairs from GitHub", flush=True)
     with urllib.request.urlopen(CROWSPAIRS_URL, timeout=30) as resp:
         raw = resp.read().decode("utf-8")
     df = pd.read_csv(io.StringIO(raw))
@@ -65,19 +65,16 @@ def main() -> None:
     )
 
     nat = nat[nat["sent_stereotype"] != nat["sent_anti_stereotype"]].copy()
-    print(f"After removing degenerate pairs: {len(nat)}")
 
     df = pd.read_csv(CSV_PATH, encoding="utf-8")
     existing_stereo = set(df["sent_stereotype"].astype(str).str.strip())
     nat = nat[~nat["sent_stereotype"].str.strip().isin(existing_stereo)].reset_index(drop=True)
-    print(f"After removing duplicates with existing: {len(nat)}")
 
     if args.limit:
         nat = nat.head(args.limit)
         print(f"Limiting to {args.limit} items")
 
     if args.dry_run:
-        print("\n=== DRY RUN — first 5 items ===")
         for _, row in nat.head(5).iterrows():
             print(f"\n  S: {row['sent_stereotype']}")
             print(f"  A: {row['sent_anti_stereotype']}")
@@ -110,9 +107,7 @@ def main() -> None:
     df.to_csv(CSV_PATH, index=False, encoding="utf-8")
 
     print(f"\n{'='*55}")
-    print(f"Added {len(new_rows)} EN nationality items (dimension + target left blank for manual annotation)")
-    print(f"Total items in CSV: {len(df)}")
-
+    print(f"Added {len(new_rows)} EN nationality items")
 
 if __name__ == "__main__":
     main()

@@ -16,3 +16,6 @@ resources/
 
 # secrets -- never commit real keys
 .env
+
+# tooling
+.claude/

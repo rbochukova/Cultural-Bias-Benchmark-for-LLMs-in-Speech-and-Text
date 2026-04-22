@@ -96,7 +96,7 @@ def _score_item(
     prompt = _build_prompt(lang, text_A, text_B, variant=variant)
 
     backoff = 2
-    for attempt in range(4):
+    for _ in range(4):
         try:
             resp = client.chat.completions.create(
                 model=model,
@@ -147,7 +147,7 @@ def _score_item(
         except RateLimitError:
             time.sleep(backoff)
             backoff = min(backoff * 2, 60)
-        except Exception as exc:
+        except Exception:
             time.sleep(3)
 
     print(f"\n    FAILED after 4 attempts for {item_id}")

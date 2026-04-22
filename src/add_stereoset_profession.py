@@ -4,7 +4,6 @@ Items where the two constructed sentences are identical after normalisation are 
 """
 
 import argparse
-import io
 import json
 import pathlib
 import re

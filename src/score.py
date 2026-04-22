@@ -412,10 +412,6 @@ def target_group_analysis(df: pd.DataFrame, stimuli_df: pd.DataFrame) -> None:
         primary     = w if primary_dim == "warmth" else c
         secondary   = c if primary_dim == "warmth" else w
         direction   = "anti-stereo" if primary["BiasScore"] < 0.5 else "pro-stereo"
-        scm_confirmed = (
-            (primary_dim == "warmth"     and primary["BiasScore"] < secondary["BiasScore"]) or
-            (primary_dim == "competence" and primary["BiasScore"] < secondary["BiasScore"])
-        )
         print(f"  {tg:12s}: primary={primary_dim} BS={primary['BiasScore']:.3f} "
               f"secondary BS={secondary['BiasScore']:.3f} | "
               f"direction={direction} sig={'*' if primary['sig_fdr_bh'] else 'ns'}")
@@ -495,7 +491,7 @@ def variant_robustness(variant_dfs: dict) -> None:
     """
     Compare BiasScore and mean logit-diff across prompt variants for each language x dimension cell.
     """
-    from scipy.stats import binomtest, ttest_1samp
+    from scipy.stats import binomtest
 
     if len(variant_dfs) < 2:
         print("(fewer than 2 variants available - robustness check skipped)")
@@ -530,7 +526,7 @@ def variant_robustness(variant_dfs: dict) -> None:
     rows = []
     for (lang, dim) in cells:
         row = {"language": lang, "dimension": dim}
-        bs_vals, ld_vals, sig_flags = [], [], []
+        bs_vals, sig_flags = [], []
 
         for v, df in variant_dfs.items():
             sub = df[(df["language"] == lang) & (df["dimension"] == dim)]
@@ -584,10 +580,12 @@ def variant_robustness(variant_dfs: dict) -> None:
                 if len(merged) == 0:
                     print(f"  natural vs {v}: no overlapping items")
                     continue
-                a = int(((merged["chose_stereotype_nat"] == True)  & (merged[f"chose_stereotype_{v[:3]}"] == True)).sum())
-                b = int(((merged["chose_stereotype_nat"] == True)  & (merged[f"chose_stereotype_{v[:3]}"] == False)).sum())
-                c = int(((merged["chose_stereotype_nat"] == False) & (merged[f"chose_stereotype_{v[:3]}"] == True)).sum())
-                d = int(((merged["chose_stereotype_nat"] == False) & (merged[f"chose_stereotype_{v[:3]}"] == False)).sum())
+                nat = merged["chose_stereotype_nat"]
+                var = merged[f"chose_stereotype_{v[:3]}"]
+                a = int((nat & var).sum())
+                b = int((nat & ~var).sum())
+                c = int((~nat & var).sum())
+                d = int((~nat & ~var).sum())
                 agree_pct = 100 * (a + d) / len(merged) if len(merged) > 0 else float("nan")
                 if (b + c) > 0:
                     chi2_stat = (abs(b - c) - 1) ** 2 / (b + c)

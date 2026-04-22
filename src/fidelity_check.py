@@ -55,7 +55,7 @@ COMPETENCE_FR = {
     'assertif','assertive','décisif','décisive','analytique',
     'leadership','leader','diriger','dirigeant','gérer','gestion',
     'réussir','réussi','réussie','succès','performance','compétition',
-    'carrière','travail','emploi','professionnel','technique','science',
+    'carrière','travail','emploi','technique','science',
     'mathématiques','problème','résoudre','réparer','construire',
     'conduire','sport','athlétique','gagner','gagné','championnat',
     'argent','finances','financier','budget','investissement',
@@ -89,7 +89,7 @@ COMPETENCE_BG = {
     'готов','готова', 
     'ръководен','ръководна','ръководител','лидер','управлявам','управление',
     'успех','постижение','работа','кариера','професионален','професионална',
-    'физически','спорт','атлетичен','атлетична','победа','шампион',
+    'спорт','атлетичен','атлетична','победа','шампион',
     'пари','финанси','финансов','финансова','бюджет','инвестиция',
     'защитавам','защитен','защитена','протектор','сигурност',
     'математика','наука','техника','проблем','решавам',
@@ -145,7 +145,7 @@ def _backtranslate_batch(client: OpenAI, texts: list[str], src_lang: str) -> lis
                     translations.append('')
                 results.extend(translations[:len(batch)])
                 break
-            except Exception as exc:
+            except Exception:
                 if attempt == 2:
                     results.extend([''] * len(batch))
                 time.sleep(2)

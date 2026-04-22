@@ -8,7 +8,6 @@ import argparse
 import hashlib
 import pathlib
 import sys
-import time
 from datetime import datetime, timezone
 
 sys.stdout.reconfigure(encoding="utf-8")
@@ -32,7 +31,6 @@ def _load_model(device: str):
     """Load mDeBERTa-v3 tokenizer and model."""
     try:
         import torch
-        # Import DeBERTa classes directly to avoid the AutoModel factory
         from transformers import DebertaV2Tokenizer, DebertaV2ForMaskedLM
     except ImportError:
         sys.exit(
@@ -45,7 +43,6 @@ def _load_model(device: str):
     model     = DebertaV2ForMaskedLM.from_pretrained(MODEL_NAME)
     model.eval()
 
-    import torch
     if device == "auto":
         device = "cuda" if torch.cuda.is_available() else "cpu"
     model = model.to(device)

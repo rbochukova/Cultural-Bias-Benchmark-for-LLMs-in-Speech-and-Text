@@ -6,7 +6,6 @@ WER and CER are computed per sentence using `jiwer` comparing the ASR transcript
 import argparse
 import pathlib
 import sys
-import time
 from datetime import datetime, timezone
 
 import pandas as pd
@@ -38,7 +37,6 @@ def _load_whisper(model_name: str):
 
 def _transcribe(model, audio_path: pathlib.Path, lang_code: str) -> str:
     """Return transcript string for one audio file."""
-    import whisper
     import torch
     result = model.transcribe(
         str(audio_path),

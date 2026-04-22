@@ -378,7 +378,6 @@ def print_feature_prevalence_by_lang(df_err: pd.DataFrame) -> None:
     features = ["negation_flip", "pronoun_altered", "insertion_heavy",
                 "deletion_heavy", "trait_altered"]
     langs = sorted(df_err["language"].unique())
-    col_w = 14
 
     header = f"  {'feature':<22}"
     for lang in langs:

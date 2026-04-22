@@ -7,8 +7,6 @@ import os
 import pathlib
 import sys
 
-import pandas as pd
-
 from validate_csv import load_validated, validate, CSV_PATH
 
 ROOT     = pathlib.Path(__file__).resolve().parent.parent

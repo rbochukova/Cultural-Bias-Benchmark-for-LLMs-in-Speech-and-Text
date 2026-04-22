@@ -12,7 +12,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
 from stimulus_expander import infer_dimension, _Expander
-from validate_csv import validate, VALID_DIMENSIONS, VALID_GROUPS, VALID_LANGUAGES
+from validate_csv import validate, VALID_DIMENSIONS, VALID_LANGUAGES
 
 
 class TestInferDimension:
@@ -210,7 +210,7 @@ class TestStimuliStructure:
         assert not invalid, f"Unexpected dimensions in stimuli: {invalid}"
 
     def test_no_identical_sentence_pairs_in_validated(self, stimuli_df):
-        validated = stimuli_df[stimuli_df["validated"] == True]
+        validated = stimuli_df[stimuli_df["validated"].astype(bool)]
         same = validated["sent_stereotype"] == validated["sent_anti_stereotype"]
         assert not same.any(), (
             f"{same.sum()} validated items have identical stereotype/anti-stereotype sentences"
@@ -232,7 +232,7 @@ class TestTextResultsStructure:
 
     def test_chose_stereotype_is_binary(self, text_results_df):
         vals = set(text_results_df["chose_stereotype"].dropna().unique())
-        assert vals <= {0, 1, True, False}, f"Non-binary chose_stereotype values: {vals}"
+        assert all(v in (0, 1, True, False) for v in vals), f"Non-binary chose_stereotype values: {vals}"
 
     def test_all_item_ids_in_stimuli(self, text_results_df, stimuli_df):
         result_ids  = set(text_results_df["item_id"].astype(str))

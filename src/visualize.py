@@ -94,8 +94,8 @@ def fig_biasbars(df: pd.DataFrame, model_name: str, show: bool) -> None:
     for i, (s, (lang, dim)) in enumerate(zip(stats, cells)):
         color  = LANG_COLORS.get(lang, "#888888")
         alpha  = 0.8 if dim == "competence" else 0.5
-        bar    = ax.bar(x[i], s["bs"], width, color=color, alpha=alpha,
-                        edgecolor="white", linewidth=0.8)
+        ax.bar(x[i], s["bs"], width, color=color, alpha=alpha,
+               edgecolor="white", linewidth=0.8)
         ax.errorbar(x[i], s["bs"],
                     yerr=[[s["bs"] - s["ci_lo"]], [s["ci_hi"] - s["bs"]]],
                     fmt="none", color="black", capsize=4, linewidth=1.2, zorder=5)
@@ -395,7 +395,7 @@ def fig_cue_comparison(df: pd.DataFrame, fid_df: pd.DataFrame,
     width  = 0.35
 
     fig, ax = plt.subplots(figsize=(9, 5))
-    for k, (sub_label, offset) in enumerate([("Explicit-cue", -width/2),
+    for _, (sub_label, offset) in enumerate([("Explicit-cue", -width/2),
                                               ("Behavioural",   width/2)]):
         sub_tbl = tbl[tbl["subgroup"] == sub_label]
         for j, (lang, dim) in enumerate(combos):
@@ -453,7 +453,6 @@ def fig_target_group(df: pd.DataFrame, stimuli_df: pd.DataFrame, show: bool) -> 
     Native vs translated BiasScore divergence: dot plot per language x target_group cell, showing BS_native and BS_translated side by side, connected by a line coloured by direction of delta.
     """
     import matplotlib.pyplot as plt
-    import matplotlib.patches as mpatches
     from scipy.stats import mannwhitneyu
 
     TRANSLATED_SOURCES = {
@@ -570,7 +569,7 @@ def fig_target_group(df: pd.DataFrame, stimuli_df: pd.DataFrame, show: bool) -> 
                 y += 1
 
         if cells_nt:
-            for y_pos, nat_bs, tran_bs, p_mw, label in cells_nt:
+            for y_pos, nat_bs, tran_bs, p_mw, _ in cells_nt:
                 color = "#cc2200" if nat_bs < tran_bs else "#1a6b2e"
                 ax2.plot([nat_bs, tran_bs], [y_pos, y_pos],
                          color=color, linewidth=1.5, alpha=0.7, zorder=2)
@@ -614,7 +613,6 @@ def fig_variant_robustness(show: bool) -> None:
     (natural / grammar / typical) for each language × dimension cell.
     """
     import matplotlib.pyplot as plt
-    import matplotlib.patches as mpatches
 
     variant_files = {
         "natural": TEXT_DIR / "gpt-4o-mini_results.csv",
@@ -640,7 +638,6 @@ def fig_variant_robustness(show: bool) -> None:
 
     cells      = [f"{l}/{d}" for l in ["en", "fr", "bg"]
                   for d in ["warmth", "competence"]]
-    cell_langs = [c.split("/")[0] for c in cells]
     variants   = list(dfs.keys())
     n_var      = len(variants)
     n_cell     = len(cells)
@@ -907,7 +904,7 @@ def fig_speech_variant_robustness(
     ] + [plt.Line2D([0], [0], color="black", linestyle="-", label="no gap (0)")]
     ax.legend(handles=legend_handles, fontsize=8.5, loc="upper right", framealpha=0.9)
 
-    for i, (lang, dim) in enumerate(cells):
+    for i, (_, __) in enumerate(cells):
         vals = [gaps[v][i] for v in variants if not pd.isna(gaps[v][i])]
         if len(vals) >= 2:
             spread = max(vals) - min(vals)
@@ -990,7 +987,7 @@ def fig_speech_comparison(text_df: pd.DataFrame, speech_df: pd.DataFrame,
     width = 0.35
 
     # Panel A: BiasScore text vs speech 
-    for i, (ts, ss, (lang, dim)) in enumerate(zip(text_stats, speech_stats, cells)):
+    for i, (ts, ss, _cell) in enumerate(zip(text_stats, speech_stats, cells)):
         color = LANG_COLORS.get(lang, "#888888")
         ax1.bar(x[i] - width / 2, ts["bs"], width,
                 color=color, alpha=0.85, edgecolor="white", linewidth=0.8)
@@ -1071,8 +1068,7 @@ def main() -> None:
 
     try:
         import matplotlib
-        matplotlib.use("Agg")  
-        import matplotlib.pyplot as plt
+        matplotlib.use("Agg")
     except ImportError:
         sys.exit("ERROR: matplotlib not installed. Run: pip install matplotlib")
 

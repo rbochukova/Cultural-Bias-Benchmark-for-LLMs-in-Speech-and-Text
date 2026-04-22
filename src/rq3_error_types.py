@@ -229,7 +229,7 @@ def run_logit(df: pd.DataFrame, formula: str, label: str):
     print(f"{'─' * 60}")
 
     tbl = model.summary2().tables[1].copy()
-    
+
     tbl.columns = ["coef", "std_err", "z", "p", "CI_lo", "CI_hi"]
     tbl["OR"]     = np.exp(tbl["coef"])
     tbl["OR_lo"]  = np.exp(tbl["CI_lo"])
@@ -401,7 +401,7 @@ def per_language_logit(df: pd.DataFrame) -> None:
     """
     Fit the error-type logistic regression separately per language, restricted to items with wer_max > 0
     Helps assess whether negation_flip / deletion_heavy effects generalise
-    across EN, FR, and BG 
+    across EN, FR, and BG
     """
     import statsmodels.formula.api as smf
 
@@ -501,7 +501,7 @@ def fig_logreg_comparison(
         lo   = np.exp(conf.loc[keep, 0])
         hi   = np.exp(conf.loc[keep, 1])
         pv   = pvals[keep]
-       
+
         finite = np.isfinite(ors.values) & np.isfinite(lo.values) & np.isfinite(hi.values)
         return (
             [k for k, f in zip(keep, finite) if f],
@@ -608,7 +608,7 @@ def main() -> None:
         merged["chose_stereotype_text"] != merged["chose_stereotype_speech"]
     ).astype(int)
 
-    print(f"  RQ3 - ASR Error-Type Mechanism Analysis") 
+    print(f"  RQ3 - ASR Error-Type Mechanism Analysis")
     print(f"Items with text + speech scores : {len(merged)}")
     print(f"Decision flips : {int(merged['flip'].sum())}  "
           f"({100 * merged['flip'].mean():.1f} %)")
@@ -620,13 +620,13 @@ def main() -> None:
     df_err = df[df["wer_max"] > 0].copy()
     print(f"Items with any ASR error (wer_max > 0) : {len(df_err)}")
 
-   
+
     print_flip_by_cell(df)
     print_flip_by_wer_bin(df)
     print_feature_prevalence(df_err)
     print_feature_prevalence_by_lang(df_err)
 
-    # Logistic regression 
+    # Logistic regression
     reg_df = df.copy()
     reg_df["language"]  = reg_df["language"].astype(str)
     reg_df["dimension"] = reg_df["dimension"].astype(str)

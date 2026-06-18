@@ -1,5 +1,5 @@
 """
-Forced-choice bias scoring via a vLLM server 
+Forced-choice bias scoring via a vLLM server
 Connects to a running vLLM OpenAI-compatible server and scores each stimulus pair by mean per-token log-probability of the prompt (echo=True, max_tokens=0).
 The sentence with higher mean log-prob is the model's preference.
 
@@ -33,8 +33,6 @@ VALID_DIMS = {"warmth", "competence"}
 
 async def _sentence_logprob(client, model: str, text: str) -> float:
     """Mean per-token log-probability via vLLM completions endpoint."""
-    from openai import AsyncOpenAI  
-
     response = await client.completions.create(
         model=model,
         prompt=text,

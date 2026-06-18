@@ -43,10 +43,10 @@ PALETTE = {
     "Llama-3.2-3B-Base":            "#D35400",
 }
 
-NULL_KW = dict(color="black", linestyle="--", linewidth=1.0, alpha=0.6)
+NULL_KW = {"color": "black", "linestyle": "--", "linewidth": 1.0, "alpha": 0.6}
 
 
-# Overall BiasScore: all model/scoring conditions 
+# Overall BiasScore: all model/scoring conditions
 
 def fig1_overall():
     rows = [
@@ -72,7 +72,7 @@ def fig1_overall():
     fig, ax = plt.subplots(figsize=(8.5, 6))
     fig.patch.set_facecolor("white")
 
-    for i, (label, path, key) in enumerate(rows):
+    for i, (_label, path, key) in enumerate(rows):
         df = load(path)
         cs = df["chose_stereotype"]
         n, k = len(cs), int(cs.sum())
@@ -98,7 +98,7 @@ def fig1_overall():
 
     ax.set_yticks(range(len(rows)))
     ax.set_yticklabels([label for label, _, _ in rows], fontsize=8.5)
-    ax.set_ylim(len(rows) - 0.5, -0.7)  
+    ax.set_ylim(len(rows) - 0.5, -0.7)
     ax.set_xlabel("BiasScore (proportion stereotypical choices)", fontsize=9)
     ax.set_title("Overall BiasScore by Model\n"
                  r"$\leftarrow$ anti-stereotypical  |  null = 0.500  |  pro-stereotypical $\rightarrow$",
@@ -133,7 +133,6 @@ def fig2_origin():
 
     origins = ["native", "parallel"]
     origin_labels = ["Native\n(culture-specific)", "Parallel\n(translated)"]
-    bar_colors = ["#A8C8E8", "#3470A3"]   
 
     for ax, (name, path) in zip(axes, models):
         df = load(path)
@@ -151,8 +150,8 @@ def fig2_origin():
             err_vals.append(err)
             sig_vals.append(sig)
 
-        bars = ax.bar(origin_labels, bs_vals,
-                      color=[color + "88", color], 
+        ax.bar(origin_labels, bs_vals,
+                      color=[color + "88", color],
                       edgecolor="white", linewidth=0.8, width=0.5, zorder=3)
         ax.errorbar(origin_labels, bs_vals, yerr=err_vals,
                     fmt="none", color="#333333", capsize=4, linewidth=1.2, zorder=4)
@@ -217,7 +216,7 @@ def fig3_delta_asr():
 
     for ci, (asr_label, asr_color) in enumerate(zip(asr_labels, asr_colors)):
         deltas, errs = [], []
-        for name, text_p, lv3_p, med_p in specs:
+        for _name, text_p, lv3_p, med_p in specs:
             tx = load(text_p)["chose_stereotype"]
             sp = load([lv3_p, med_p][ci])["chose_stereotype"]
             merged = tx.reset_index(drop=True).to_frame("tx").join(
@@ -232,7 +231,7 @@ def fig3_delta_asr():
             errs.append(np.percentile(np.abs(np.array(diffs) - d), 95))
             deltas.append(d)
 
-        bars = ax.bar(x + ci * width, deltas, width,
+        ax.bar(x + ci * width, deltas, width,
                       label=f"Whisper {asr_label}",
                       color=asr_color, alpha=0.85,
                       edgecolor="white", linewidth=0.8, zorder=3)
@@ -254,7 +253,7 @@ def fig3_delta_asr():
     ax.annotate("Direction reversal\n(text: anti-stereo\nspeech: pro-stereo)",
                 xy=(1 + 0 * width, 0.028), xytext=(1.55, 0.042),
                 fontsize=7.5, color="#C0392B",
-                arrowprops=dict(arrowstyle="->", color="#C0392B", lw=1.0))
+                arrowprops={"arrowstyle": "->", "color": "#C0392B", "lw": 1.0})
 
     plt.tight_layout()
     out = FIG_DIR / "fig3_delta_asr.png"

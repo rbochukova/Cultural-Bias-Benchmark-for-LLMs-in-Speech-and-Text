@@ -121,8 +121,6 @@ def fig_a1_flip_rate_by_wer():
 
 def fig_a2_delta_asr_by_language():
     text_df = pd.read_csv(TEXT_DIR / "gpt-4o-mini_results.csv")
-    text_bs = (text_df.groupby("language")["chose_stereotype"]
-                      .mean().rename("text_bs"))
 
     asr_systems = ["large-v3", "azure", "medium", "small"]
     speech_files = {
@@ -306,7 +304,6 @@ def fig_a5_llama_decomposition():
     }
     langs       = ["en", "fr", "bg"]
     lang_labels = ["English", "French", "Bulgarian"]
-    cond_labels = list(conditions.keys())
     cond_colors = ["#78909C", "#5C6BC0", "#26A69A"]
 
     x      = np.arange(len(langs))
@@ -322,9 +319,9 @@ def fig_a5_llama_decomposition():
             vals.append(_bias_score(sub))
             cis.append(_bootstrap_ci(sub))
 
-        bars = ax.bar(x + offsets[i], vals, width,
-                      color=cond_colors[i], label=label.replace("\n", " "),
-                      alpha=0.85, edgecolor="white", linewidth=0.7)
+        ax.bar(x + offsets[i], vals, width,
+               color=cond_colors[i], label=label.replace("\n", " "),
+               alpha=0.85, edgecolor="white", linewidth=0.7)
         for j, (v, (lo, hi)) in enumerate(zip(vals, cis)):
             ax.errorbar(x[j] + offsets[i], v,
                         yerr=[[v - lo], [hi - v]],
@@ -334,12 +331,12 @@ def fig_a5_llama_decomposition():
     ax.axhline(0.5, color="black", linestyle="--", linewidth=1.0, label="Null (0.5)")
 
     ax.annotate("", xy=(x[0] + offsets[1], 0.51), xytext=(x[0] + offsets[0], 0.51),
-                arrowprops=dict(arrowstyle="<->", color="#78909C", lw=1.2))
+                arrowprops={"arrowstyle": "<->", "color": "#78909C", "lw": 1.2})
     ax.text(x[0] + (offsets[0] + offsets[1]) / 2, 0.515,
             "Repr.\nΔ=−0.017", ha="center", va="bottom", fontsize=7, color="#78909C")
 
     ax.annotate("", xy=(x[0] + offsets[2], 0.545), xytext=(x[0] + offsets[1], 0.545),
-                arrowprops=dict(arrowstyle="<->", color="#5C6BC0", lw=1.2))
+                arrowprops={"arrowstyle": "<->", "color": "#5C6BC0", "lw": 1.2})
     ax.text(x[0] + (offsets[1] + offsets[2]) / 2, 0.55,
             "Behav.\nΔ=−0.041", ha="center", va="bottom", fontsize=7, color="#5C6BC0")
 

@@ -226,7 +226,6 @@ def main() -> None:
           f"(model={args.model}, variant={args.prompt_variant})")
 
     if args.dry_run:
-        import hashlib
         for _, row in items.head(2).iterrows():
             sia = int(hashlib.md5(row["item_id"].encode()).hexdigest(), 16) % 2 == 0
             lang_name = LANG_LABELS.get(row["language"], row["language"])

@@ -1,6 +1,8 @@
 """Robustness analyses. Reproduces three checks cited in the thesis:
-  Profession dominance; Cluster-robust (GEE) logistic - re-estimate of the parallel-vs-native contrast, grouped by parallel triplet; Tokenisation / low-resource - whether the BG native-nationality items are atypically fragmented.
-
+Profession dominance; cluster-robust (GEE) logistic re-estimate of the
+parallel-vs-native contrast grouped by parallel triplet; tokenisation /
+low-resource check of whether BG native-nationality items are atypically
+fragmented.
 """
 import warnings
 import numpy as np

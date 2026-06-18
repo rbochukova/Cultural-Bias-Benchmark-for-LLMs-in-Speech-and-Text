@@ -5,7 +5,7 @@ import argparse
 import pandas as pd
 
 SEED = 42
-N_SAMPLE = 150  
+N_SAMPLE = 150
 
 
 def main() -> None:
@@ -17,8 +17,8 @@ def main() -> None:
     args = ap.parse_args()
 
     df = pd.read_csv(args.infile)
-    df = df[df["validated"] == True].copy()  
-    # Stratify by language x target_group 
+    df = df[df["validated"]].copy()
+    # Stratify by language x target_group
     df["stratum"] = df["language"] + "|" + df["target_group"]
     frac = args.n / len(df)
     sample = (
@@ -29,13 +29,12 @@ def main() -> None:
     )
 
     # Shuffle A/B presentation per item.
-    rng = sample.sample(frac=1.0, random_state=SEED).index  
     rows_sheet, rows_key = [], []
-    for pos, (_, r) in enumerate(sample.iterrows()):
+    for _, r in sample.iterrows():
         flip = (hash((r["item_id"], SEED)) % 2) == 0
         opt_a = r["sent_anti_stereotype"] if flip else r["sent_stereotype"]
         opt_b = r["sent_stereotype"] if flip else r["sent_anti_stereotype"]
-        gold_dir = "B" if flip else "A" 
+        gold_dir = "B" if flip else "A"
         rows_sheet.append({
             "item_id": r["item_id"],
             "language": r["language"],

@@ -1018,9 +1018,7 @@ def main() -> None:
         if args.lang:
             speech_df = speech_df[speech_df["language"] == args.lang]
 
-        print("\n" + "=" * 65)
         print(f"SPEECH CONDITION  - ASR: {args.asr_model}  LLM: {args.text_model}")
-        print("=" * 65)
 
         text_ids   = set(text_df["item_id"].astype(str))
         speech_ids = set(speech_df["item_id"].astype(str))
@@ -1054,9 +1052,7 @@ def main() -> None:
         print(tbl_s[["language", "dimension", "N", "BiasScore", "CI_lo", "CI_hi",
                       "p_value", "cohen_h", "sig_fdr_bh"]].to_string(index=False))
 
-        print("\n" + "=" * 65)
         print("ASR ATTRIBUTION ANALYSIS")
-        print("=" * 65)
         attr = asr_attribution(text_df, speech_df)
 
         print(f"\nPer-cell ΔASR with 95% CI and McNemar test")

@@ -238,7 +238,6 @@ def main() -> None:
     print() 
     _flush(results, results_path)
 
-    print(f"\n{'=' * 55}")
     print(f"Done. Results: {results_path.relative_to(ROOT)}")
     print(f"  Scored:  {len(results)}")
     print(f"  Failed:  {failed}")
@@ -247,7 +246,7 @@ def main() -> None:
         rdf = pd.read_csv(results_path, encoding="utf-8")
         bias_score = rdf["chose_stereotype"].mean()
         print(f"\nOverall BiasScore: {bias_score:.3f}  (null=0.500)")
-        print("\nBiasScore by language × dimension:")
+        print("\nBiasScore by language x dimension:")
         print(
             rdf.groupby(["language", "dimension"])["chose_stereotype"]
             .agg(["mean", "count"])

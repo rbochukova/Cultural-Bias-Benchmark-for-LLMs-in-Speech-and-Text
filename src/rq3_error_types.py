@@ -30,7 +30,7 @@ ROOT       = pathlib.Path(__file__).resolve().parent.parent
 TEXT_DIR   = ROOT / "data" / "results" / "text"
 SPEECH_DIR = ROOT / "data" / "results" / "speech"
 STIMULI    = ROOT / "data" / "stimuli_seed.csv"
-FIGURES    = ROOT / "reports" / "figures"
+FIGURES    = ROOT / "figures"
 FIGURES.mkdir(parents=True, exist_ok=True)
 
 
@@ -221,12 +221,10 @@ def run_logit(df: pd.DataFrame, formula: str, label: str):
     model = smf.logit(formula, data=df).fit(disp=False, maxiter=300)
     n_events = int(df["flip"].sum())
     r2 = _pseudo_r2(model)
-    print(f"\n{'─' * 60}")
     print(f"  {label}")
     print(f"  N = {len(df)},  events = {n_events}  ({100*n_events/len(df):.1f}%)")
     print(f"  Log-likelihood = {model.llf:.2f},  AIC = {model.aic:.1f}")
     print(f"  McFadden R² = {r2['mcfadden']:.4f},  Nagelkerke R² = {r2['nagelkerke']:.4f}")
-    print(f"{'─' * 60}")
 
     tbl = model.summary2().tables[1].copy()
 

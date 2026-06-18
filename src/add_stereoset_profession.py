@@ -157,7 +157,6 @@ def main() -> None:
     df = pd.concat([df, pd.DataFrame(new_rows)], ignore_index=True)
     df.to_csv(CSV_PATH, index=False, encoding="utf-8")
 
-    print(f"\n{'='*55}")
     print(f"Added {len(new_rows)} EN profession items")
 
 

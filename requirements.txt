@@ -9,6 +9,8 @@ jupyterlab
 ipython
 datasets<4.0.0
 transformers
+torch
+sentencepiece
 pyarrow
 soundfile
 librosa
@@ -19,3 +21,5 @@ tqdm
 openai
 python-dotenv
 statsmodels
+scikit-learn
+azure-cognitiveservices-speech

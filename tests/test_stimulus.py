@@ -125,7 +125,8 @@ class TestValidateCsv:
 
     def test_identical_sentences_raises(self):
         with pytest.raises(ValueError, match="Identical sent_stereotype"):
-            validate(_minimal_df(sent_stereotype="Same.", sent_anti_stereotype="Same."))
+            validate(_minimal_df(sent_stereotype="Same.", sent_anti_stereotype="Same.",
+                                 validated=True))
 
     def test_missing_column_raises(self):
         df = _minimal_df().drop(columns=["source"])

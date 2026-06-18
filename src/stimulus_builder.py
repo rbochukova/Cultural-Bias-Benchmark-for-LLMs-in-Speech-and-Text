@@ -3,7 +3,7 @@ Seeds the SCM warmth/competence probe set from existing benchmarks.
 Sources:
 - CrowS-Pairs EN  (gender, profession, nationality) 
 - SHADES EN + FR  (nationality)                       
-- Manual BG,FR       (all three groups)                  
+- Manual BG,FR    (all three groups)                  
 
 Column schema:
 item_id            : unique key, e.g. EN-G-001  (lang-group-seq)
@@ -222,7 +222,6 @@ if out.exists():
 df = pd.DataFrame(rows, columns=COLS)
 df.to_csv(out, index=False, encoding="utf-8-sig")
 
-print(f"\n{'-'*50}")
 print(f"Saved {len(df)} items -> {out.relative_to(ROOT)}")
 print()
 print(df.groupby(["language", "target_group"])["item_id"].count()

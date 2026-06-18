@@ -20,6 +20,10 @@ REQUIRED_COLS     = [
     "sent_stereotype", "sent_anti_stereotype",
     "source", "validated",
 ]
+# item_id schemes (both valid):
+#   LANG-GROUP-NNN            e.g. EN-G-001, EN-P-002
+#   LANG-GROUP-SUBCODE-NNN    e.g. FR-P-PRO-001, BG-N-ROM-003
+# In both, the second field is the GROUP letter and the last field is numeric.
 ID_GROUP_MAP      = {"G": "gender", "N": "nationality", "P": "profession"}
 
 
@@ -34,7 +38,7 @@ def validate(df: pd.DataFrame, path: str = "") -> None:
     if missing_cols:
         violations.append(f"Missing columns: {missing_cols}")
         raise ValueError(f"Schema violations in {label}:\n" + "\n".join(violations))
-    
+
     dups = df[df.duplicated("item_id", keep=False)]["item_id"].unique()
     if len(dups):
         violations.append(f"Duplicate item_ids ({len(dups)}): {list(dups)[:10]}")
@@ -55,12 +59,10 @@ def validate(df: pd.DataFrame, path: str = "") -> None:
     if bad_group:
         violations.append(f"Invalid target_group values in {len(bad_group)} rows: {bad_group[:5]}")
 
-    
-    df["_val_coerced"] = pd.to_numeric(df["validated"], errors="coerce")
+
     non_bool = df[~df["validated"].isin([True, False, 0, 1])]["item_id"].tolist()
     if non_bool:
         violations.append(f"Non-boolean validated values in {len(non_bool)} rows: {non_bool[:5]}")
-    df.drop(columns=["_val_coerced"], inplace=True)
 
 
     for col in ("sent_stereotype", "sent_anti_stereotype", "item_id", "target_group"):
@@ -69,21 +71,24 @@ def validate(df: pd.DataFrame, path: str = "") -> None:
             violations.append(f"Empty {col} in {len(empty)} rows: {empty[:5]}")
 
 
-    identical = df[
-        df["sent_stereotype"].str.strip() == df["sent_anti_stereotype"].str.strip()
+    # Identical pairs are only a defect among validated items; non-validated rows
+    # are excluded from analysis (kept as provenance) and may legitimately differ.
+    val = df[df["validated"].isin([True, 1])]
+    identical = val[
+        val["sent_stereotype"].str.strip() == val["sent_anti_stereotype"].str.strip()
     ]["item_id"].tolist()
     if identical:
-        violations.append(f"Identical sent_stereotype/anti in {len(identical)} rows: {identical[:5]}")
+        violations.append(f"Identical sent_stereotype/anti in {len(identical)} validated rows: {identical[:5]}")
 
-  
+
     bad_format = []
     for iid in df["item_id"]:
         parts = str(iid).split("-")
-        if len(parts) != 3 or parts[1] not in ID_GROUP_MAP:
+        if len(parts) not in (3, 4) or parts[1] not in ID_GROUP_MAP:
             bad_format.append(iid)
             continue
         try:
-            int(parts[2])
+            int(parts[-1])
         except ValueError:
             bad_format.append(iid)
     if bad_format:
@@ -92,7 +97,7 @@ def validate(df: pd.DataFrame, path: str = "") -> None:
     mismatch = []
     for _, row in df.iterrows():
         parts = str(row["item_id"]).split("-")
-        if len(parts) == 3 and parts[1] in ID_GROUP_MAP:
+        if len(parts) in (3, 4) and parts[1] in ID_GROUP_MAP:
             expected = ID_GROUP_MAP[parts[1]]
             if row["target_group"] != expected:
                 mismatch.append(row["item_id"])

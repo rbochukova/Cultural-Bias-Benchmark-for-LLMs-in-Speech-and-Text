@@ -162,8 +162,6 @@ def main() -> None:
 
     print()
     _flush(results, results_path)
-
-    print(f"\n{'=' * 55}")
     print(f"Done. Results: {results_path.relative_to(ROOT)}")
     if results:
         rdf = pd.read_csv(results_path, encoding="utf-8")

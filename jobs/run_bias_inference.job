@@ -1,0 +1,62 @@
+#!/bin/bash
+#SBATCH -job-name=bias_inference
+#SBATCH -partition=gpu_a100
+#SBATCH -nodes=1
+#SBATCH -ntasks=1
+#SBATCH -gpus-per-node=1
+#SBATCH -cpus-per-task=9
+#SBATCH -time=02:00:00
+#SBATCH -output=logs/bias_%j.out
+#SBATCH -error=logs/bias_%j.err
+
+# user-configurable 
+CONTAINER=/projects/2/managed_datasets/containers/vllm/vllm.sif
+MODEL_CHECKPOINT=mistralai/Mistral-7B-v0.1
+LANG=                     # leave empty to score all languages at once
+MAX_CONCURRENT=64
+PORT=8000
+DOWNLOAD_DIR=${HOME}/.cache/huggingface/hub
+
+
+mkdir -p logs
+
+# bind the project directory so the container can read/write results
+BIND_DIRS="${PWD},${HOME}/.cache/huggingface"
+
+VLLM_BASE_URL=http://localhost:${PORT}/v1
+
+echo "Starting vLLM server for ${MODEL_CHECKPOINT} ..."
+apptainer exec --nv \
+    -B "${BIND_DIRS}" \
+    "${CONTAINER}" \
+    vllm serve "${MODEL_CHECKPOINT}" \
+    --tensor-parallel-size "${SLURM_GPUS_ON_NODE}" \
+    --download-dir "${DOWNLOAD_DIR}" \
+    --uvicorn-log-level warning \
+    --port "${PORT}" &
+
+VLLM_PID=$!
+
+echo "Waiting for vLLM server to become ready..."
+for i in $(seq 1 120); do
+    if curl -s "${VLLM_BASE_URL}/models" | grep -q "${MODEL_CHECKPOINT}"; then
+        echo "Server ready after ${i}s"
+        break
+    fi
+    sleep 1
+done
+
+# run the scoring script
+echo "Running bias inference..."
+apptainer exec --nv \
+    -B "${BIND_DIRS}" \
+    "${CONTAINER}" \
+    python src/inference_vllm.py \
+        --model          "${MODEL_CHECKPOINT}" \
+        --base-url       "${VLLM_BASE_URL}" \
+        --max-concurrent "${MAX_CONCURRENT}" \
+        ${LANG:+--lang "${LANG}"}
+
+kill "${VLLM_PID}" 2>/dev/null
+wait "${VLLM_PID}" 2>/dev/null
+echo "Done."

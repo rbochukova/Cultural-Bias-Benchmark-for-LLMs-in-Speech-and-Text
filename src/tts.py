@@ -1,6 +1,5 @@
 """
-Generates audio files for all validated stimuli using Azure Cognitive Services
-Text-to-Speech.
+Generates audio files for all validated stimuli using Azure Cognitive Services Text-to-Speech.
 """
 
 import argparse
@@ -177,7 +176,6 @@ def main() -> None:
         time.sleep(0.5) 
 
     print()
-    print(f"\n{'=' * 55}")
     print(f"Done.  Generated={succeeded}  Failed={failed}")
     print(f"Audio files in: {AUDIO_DIR.relative_to(ROOT)}")
 

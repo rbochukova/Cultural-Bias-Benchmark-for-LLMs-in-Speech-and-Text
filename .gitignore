@@ -11,11 +11,25 @@ __pycache__/
 */.ipynb_checkpoints/*
 resources/
 
-# other
+# IDEs / tooling
 .idea/*
+.claude/
 
 # secrets -- never commit real keys
 .env
 
-# tooling
-.claude/
+# run logs / scratch
+logs/
+logs_*.txt
+log
+615
+keyword_hits.txt
+fr_bg_targets.txt
+data/verdicts_311_730.txt
+
+# test cache
+.pytest_cache/
+
+# audio (large, regenerable via tts.py)
+data/audio/
+</content>

@@ -14,10 +14,13 @@ sys.stdout.reconfigure(encoding="utf-8")
 
 import pandas as pd
 
-ROOT        = pathlib.Path(__file__).resolve().parent.parent
-CSV_PATH    = ROOT / "data" / "stimuli_seed.csv"
-RESULTS_DIR = ROOT / "data" / "results" / "text"
-RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+ROOT       = pathlib.Path(__file__).resolve().parent.parent
+CSV_PATH   = ROOT / "data" / "stimuli_seed.csv"
+ASR_DIR    = ROOT / "data" / "results" / "asr"
+TEXT_DIR   = ROOT / "data" / "results" / "text"
+SPEECH_DIR = ROOT / "data" / "results" / "speech"
+TEXT_DIR.mkdir(parents=True, exist_ok=True)
+SPEECH_DIR.mkdir(parents=True, exist_ok=True)
 
 MODEL_NAME = "microsoft/mdeberta-v3-base"
 VALID_DIMS = {"warmth", "competence"}
@@ -109,7 +112,7 @@ def _score_item(
         chose_A      = pll_A >= pll_B
         chose_stereo = chose_A if stereo_is_A else not chose_A
 
-        return {
+        result = {
             "item_id":           item_id,
             "language":          lang,
             "dimension":         meta["dimension"],
@@ -117,17 +120,23 @@ def _score_item(
             "target":            meta["target"],
             "origin":            meta["origin"],
             "parallel_group_id": meta["parallel_group_id"],
-            "model":             MODEL_NAME.split("/")[-1], 
+            "model":             MODEL_NAME.split("/")[-1],
             "prompt_variant":    "pll",
-            "modality":          "text",
-            "asr_system":        None,
+            "modality":          "speech" if meta.get("asr_system") else "text",
+            "asr_system":        meta.get("asr_system"),
             "A_is_stereotype":   stereo_is_A,
-            "logprob_A":         round(pll_A, 6),  
+            "logprob_A":         round(pll_A, 6),
             "logprob_B":         round(pll_B, 6),
             "chose_A":           chose_A,
             "chose_stereotype":  chose_stereo,
             "scored_at":         datetime.now(timezone.utc).isoformat(),
         }
+        if meta.get("asr_system"):
+            result["wer_S"] = meta.get("wer_S")
+            result["wer_A"] = meta.get("wer_A")
+            result["transcript_S"] = text_stereo
+            result["transcript_A"] = text_anti
+        return result
     except Exception as exc:
         print(f"\n    ERROR scoring {item_id}: {exc}", flush=True)
         return None
@@ -159,6 +168,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="mDeBERTa-v3 PLL bias inference")
     parser.add_argument("--lang",       default=None,
                         help="Filter to one language: en, fr, bg (default: all)")
+    parser.add_argument("--asr-model",  default=None,
+                        help="Score ASR transcripts instead of original text "
+                             "(e.g. large-v3, medium). Saves to results/speech/.")
     parser.add_argument("--device",     default="auto",
                         help="Torch device: auto (default), cpu, cuda")
     parser.add_argument("--batch-size", type=int, default=1,
@@ -167,23 +179,48 @@ def main() -> None:
                         help="Print PLL for first 3 items and exit")
     args = parser.parse_args()
 
-    df = pd.read_csv(CSV_PATH, encoding="utf-8")
-    items = df[
-        df["validated"].map(lambda x: str(x).strip().lower() in ("true", "1"))
-        & df["dimension"].isin(VALID_DIMS)
+    stim = pd.read_csv(CSV_PATH, encoding="utf-8")
+    validated = stim[
+        stim["validated"].map(lambda x: str(x).strip().lower() in ("true", "1"))
+        & stim["dimension"].isin(VALID_DIMS)
     ].copy()
 
     if args.lang:
-        items = items[items["language"] == args.lang]
+        validated = validated[validated["language"] == args.lang]
+
+    safe_model = MODEL_NAME.replace("/", "-")
+
+    if args.asr_model:
+        asr_path = ASR_DIR / f"{args.asr_model}_transcripts.csv"
+        if not asr_path.exists():
+            sys.exit(
+                f"ERROR: ASR transcripts not found: {asr_path}\n"
+                f"Run: python src/asr.py --model {args.asr_model}"
+            )
+        asr_df = pd.read_csv(asr_path, encoding="utf-8")
+        asr_S = (asr_df[asr_df["suffix"] == "S"]
+                 .set_index("item_id")[["transcript", "wer"]]
+                 .rename(columns={"transcript": "sent_stereotype", "wer": "wer_S"}))
+        asr_A = (asr_df[asr_df["suffix"] == "A"]
+                 .set_index("item_id")[["transcript", "wer"]]
+                 .rename(columns={"transcript": "sent_anti_stereotype", "wer": "wer_A"}))
+        meta_cols = validated.set_index("item_id")[
+            ["language", "dimension", "target_group", "target", "origin", "parallel_group_id"]
+        ]
+        items = meta_cols.join(asr_S).join(asr_A).dropna(
+            subset=["sent_stereotype", "sent_anti_stereotype"]
+        ).reset_index()
+        results_path = SPEECH_DIR / f"{args.asr_model}_{safe_model}_results.csv"
+    else:
+        items = validated
+        results_path = TEXT_DIR / f"{safe_model}_results.csv"
 
     items["_stereo_is_A"] = items["item_id"].apply(
         lambda iid: _item_seed(iid) % 2 == 0
     )
 
-    safe_model   = MODEL_NAME.replace("/", "-")
-    results_path = RESULTS_DIR / f"{safe_model}_results.csv"
-    done         = _load_existing(results_path)
-    to_score     = items[~items["item_id"].isin(done)]
+    done     = _load_existing(results_path)
+    to_score = items[~items["item_id"].isin(done)]
 
     tokenizer, model, device = _load_model(args.device)
 
@@ -195,7 +232,7 @@ def main() -> None:
             pll_a  = _pll(a_text, tokenizer, model, device)
             chose  = "STEREO" if pll_s >= pll_a else "ANTI"
             print(f"\n[{row['item_id']}] lang={row['language']} dim={row['dimension']}")
-            print(f"  PLL(stereo)={pll_s:.4f}  PLL(anti)={pll_a:.4f}  → {chose}")
+            print(f"  PLL(stereo)={pll_s:.4f}  PLL(anti)={pll_a:.4f}  -> {chose}")
             print(f"  S: {s_text[:70]}")
             print(f"  A: {a_text[:70]}")
         return
@@ -214,6 +251,9 @@ def main() -> None:
             "target":            row["target"],
             "origin":            row["origin"],
             "parallel_group_id": row["parallel_group_id"],
+            "asr_system":        args.asr_model,
+            "wer_S":             float(row["wer_S"]) if args.asr_model and "wer_S" in row else None,
+            "wer_A":             float(row["wer_A"]) if args.asr_model and "wer_A" in row else None,
         }
         result = _score_item(
             row["item_id"], str(row["language"]),
@@ -238,7 +278,6 @@ def main() -> None:
     print()
     _flush(results, results_path)
 
-    print(f"\n{'='*55}")
     print(f"Done. Results: {results_path.relative_to(ROOT)}")
     print(f"  Scored : {len(results)}")
     print(f"  Failed : {failed}")

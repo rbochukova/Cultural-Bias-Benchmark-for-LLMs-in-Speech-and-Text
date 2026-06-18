@@ -212,7 +212,6 @@ def main() -> None:
     validate(final, str(CSV_PATH))
     final.to_csv(CSV_PATH, index=False, encoding="utf-8-sig")
 
-    print(f"\n{'-' * 55}")
     print(f"Total: {len(final)}  ({len(existing)} existing + {len(new_df)} new)")
     print()
     print(final.groupby(["language", "target_group"])["item_id"].count()

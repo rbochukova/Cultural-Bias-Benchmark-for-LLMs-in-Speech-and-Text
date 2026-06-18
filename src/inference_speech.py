@@ -4,10 +4,6 @@ Reads ASR transcripts from data/results/asr/<whisper_model>_transcripts.csv and 
 This lets us compare:
     BiasScore_text  (from inference_text.py - original sentences)
     BiasScore_speech (from this script - ASR transcripts of the same sentences)
-
-The difference between the two is the raw modality gap. The attribution analysis in score.py then partitions that gap into:
-    ASR error contribution  (items where WER > 0 drive the gap)
-    Residual modality effect (gap on items with perfect ASR, WER = 0)
 """
 
 import argparse
@@ -294,7 +290,6 @@ def main() -> None:
     print()
     _flush(results, results_path)
 
-    print(f"\n{'=' * 55}")
     print(f"Done. Results: {results_path.relative_to(ROOT)}")
     if results:
         rdf = pd.read_csv(results_path, encoding="utf-8")

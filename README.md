@@ -1,12 +1,12 @@
 # Cultural Bias Benchmark for LLMs in Speech and Text
 
-A multilingual benchmark that measures cultural bias in large language models (LLMs) under two conditions — standard **text** prompts and a **speech** pipeline where audio is first transcribed by an ASR system before being scored by the LLM.
+A multilingual benchmark that measures cultural bias in large language models (LLMs) under two conditions: standard **text** prompts and a **speech** pipeline where audio is first transcribed by an ASR system before being scored by the LLM.
 
 The benchmark covers **English, French, and Bulgarian** and probes biases along the Stereotype Content Model (SCM) dimensions of **warmth** and **competence**. Three research questions are investigated:
 
-- **RQ1 (Cultural grounding):** Do bias scores differ by language, SCM dimension, and item origin (parallel-translated vs. culture-specific native)?
-- **RQ2 (Pipeline attribution):** How large is the ASR-attributable modality gap (ΔASR) between the Whisper/Azure-to-LLM pipeline and the oracle-transcript-to-LLM baseline?
-- **RQ3 (Error-type mechanism):** Which ASR error types — negation changes, deletion-heavy segments, trait-cue substitutions — most strongly predict SCM decision flips, beyond raw WER?
+- **Cultural grounding:** Do bias scores differ by language, SCM dimension, and item origin (parallel-translated vs. culture-specific native)?
+- **Pipeline attribution:** How large is the ASR-attributable modality gap (ΔASR) between the Whisper/Azure-to-LLM pipeline and the oracle-transcript-to-LLM baseline?
+- **Error-type mechanism:** Which ASR error types: negation changes, deletion-heavy segments, trait-cue substitutions - most strongly predict SCM decision flips, beyond raw WER?
 
 ## Models and conditions
 
@@ -23,36 +23,15 @@ Six models spanning aligned (instruction-tuned/RLHF) and unaligned families are 
 
 `src/inference_vllm.py` provides an OpenAI-compatible vLLM client for running the large local models on a SLURM cluster.
 
-The speech condition is evaluated under **four ASR systems** — Whisper `large-v3`, `medium`, `small` (`src/asr.py`) and Azure Speech-to-Text (`src/asr_azure.py`) — so ΔASR can be traced to transcription quality (WER ≈ 4.9–16.0%).
-
-## Key findings
-
-BiasScore is the proportion of items where the model preferred the stereotypical sentence (null = 0.500; > 0.500 = stereotypical lean, < 0.500 = anti-stereotypical lean). Full statistics (Cohen's *h*, BH-FDR-corrected binomial tests, Wilson CIs) are in the thesis.
-
-**RQ1 — alignment splits the direction of bias.** Aligned (RLHF / instruction-tuned) models lean *anti*-stereotypical, while unaligned base LMs lean *pro*-stereotypical (text condition, all items):
-
-| Model | BiasScore | Lean |
-|---|---|---|
-| GPT-4o-mini | **0.442** | anti-stereotypical |
-| mDeBERTa-v3-base | 0.484 | ~null |
-| Llama-3.2-3B-Instruct (prompted) | 0.523 | ~null |
-| BLOOM-7B1 | 0.553 | pro-stereotypical |
-| Mistral-7B-v0.1 | 0.577 | pro-stereotypical |
-| Llama-3.2-3B (base) | 0.581 | pro-stereotypical |
-
-**Origin & culture.** The effect is strongest on culture-specific *native* items, not parallel-translated ones, and varies sharply by language: Mistral-7B is markedly *anti*-stereotypical on native Bulgarian nationality items (**0.142**) but pro-stereotypical on the French counterparts (0.533) — i.e. bias is culturally grounded, not a uniform shift.
-
-**RQ2 — the ASR pipeline nudges decisions toward stereotypes.** ΔASR (BiasScore speech − text, Whisper large-v3) is positive across models: GPT-4o-mini +0.010, Mistral-7B +0.017, and mDeBERTa +0.028 (the largest, a reliable anti→pro reversal). Whisper and Azure produce near-identical shifts, pointing to transcription quality (WER) rather than a specific ASR system.
-
-**RQ3 — specific error types, not raw WER, drive flips.** Decision reversals between text and speech are predicted by negation changes, deletion-heavy segments, and SCM trait-cue substitutions beyond the contribution of overall WER (`src/rq3_error_types.py`).
+The speech condition is evaluated under **four ASR systems**: Whisper `large-v3`, `medium`, `small` (`src/asr.py`) and Azure Speech-to-Text (`src/asr_azure.py`), so ΔASR can be traced to transcription quality (WER ≈ 4.9–16.0%).
 
 ## Stimuli
 
 Stimuli are forced-choice sentence pairs: one stereotypical, one anti-stereotypical. Each item is assigned to either the **warmth** or **competence** dimension of the SCM. Dimension labels were assigned manually by the author; inter-annotator agreement on a stratified subsample is reported in the thesis (see `src/iaa_*.py`). Items were drawn from existing bias datasets (see Acknowledgements) and supplemented with original sentences. All items were manually reviewed and validated before use.
 
 Items are categorised by origin:
-- **Parallel** — the same underlying social scenario appears across languages (cross-language aligned groups, prefixed `PG-` for gender, `PN-` for nationality).
-- **Native** — culture-specific items with no cross-language counterpart.
+- **Parallel**: the same underlying social scenario appears across languages (cross-language aligned groups, prefixed `PG-` for gender, `PN-` for nationality).
+- **Native**: culture-specific items with no cross-language counterpart.
 
 ## Repository structure
 
@@ -124,7 +103,7 @@ HF_TOKEN=hf_...
 
 ## Usage
 
-### Text condition (RQ1)
+### Text condition (Cultural grounding)
 
 ```bash
 # Score with each model
@@ -137,7 +116,7 @@ python src/inference_instruct_lm.py --model meta-llama/Llama-3.2-3B-Instruct
 python src/score.py
 ```
 
-### Speech condition (RQ2)
+### Speech condition (Pipeline attribution)
 
 ```bash
 # 1. Generate audio (Azure TTS)
@@ -159,7 +138,7 @@ python src/score.py
 
 The text inference scripts accept `--prompt-variant grammar` and `--prompt-variant typical` for the robustness checks.
 
-### RQ3 error-type analysis
+### Error-type analysis
 
 ```bash
 python src/rq3_error_types.py
@@ -191,6 +170,6 @@ ASR: [OpenAI Whisper](https://github.com/openai/whisper) (Radford et al., 2023) 
 LLM scoring: [OpenAI API](https://platform.openai.com/) and [HuggingFace Transformers](https://huggingface.co/docs/transformers).
 TTS: [Azure Cognitive Services Speech](https://azure.microsoft.com/en-us/products/ai-services/ai-speech).
 
-MSc thesis project — Information Studies (Data Science track), University of Amsterdam, 2026.
+MSc thesis project - Information Studies (Data Science track), University of Amsterdam, 2026.
 </content>
 </invoke>

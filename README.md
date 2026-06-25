@@ -71,6 +71,7 @@ Items are categorised by origin:
 │   ├── iaa_sample.py                  # Draw stratified IAA subsample + blind coding sheet
 │   ├── iaa_kappa.py                   # Cohen's kappa with bootstrap CI
 │   ├── reviewer_response.py           # Profession-exclusion, GEE, tokenisation checks
+│   ├── translit_control.py            # Cyrillic→Latin script control (BG tokenisation)
 │   └── robustness_extra.py            # Surface-controlled origin effect, source, prompt variants
 ├── figures/                          # Generated figures (PNG)
 ├── notebooks/eda_datasets.ipynb       # Exploratory data analysis
@@ -152,6 +153,7 @@ Fits `flip ~ WER + error_type_features + lang + dim` and saves a forest plot to 
 python src/make_figures.py             # Fig 1–3
 python src/appendix_figures.py         # Appendix A1–A9
 python src/reviewer_response.py        # Profession / GEE / tokenisation checks
+python src/translit_control.py         # Cyrillic→Latin script control (BG nationality items)
 python src/robustness_extra.py         # Surface-controlled + source + prompt-variant checks
 python src/iaa_kappa.py                # Inter-annotator agreement
 ```
